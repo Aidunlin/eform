@@ -1,11 +1,6 @@
 use super::form::*;
 use super::question::*;
-use eframe::egui::Direction;
-use eframe::egui::Layout;
 use eframe::egui::TopBottomPanel;
-use eframe::egui::emath::Vec2;
-use eframe::emath::Align;
-use eframe::epaint::Color32;
 use eframe::{
     egui::{CentralPanel, Context, Grid, ScrollArea, Ui},
     App, Frame,
@@ -35,7 +30,6 @@ impl EformApp {
                 data: data.clone(),
             })
             .collect();
-
         Self {
             forms: vec![form],
             form_index: None,
@@ -52,16 +46,12 @@ impl EformApp {
                     self.form_index = Some(self.forms.len() - 1);
                 }
             });
-    
             ui.group(|ui| {
                 ui.heading("Forms");
-    
                 let mut delete_form = None;
-    
                 Grid::new("forms").striped(true).show(ui, |ui| {
                     for (i, form) in self.forms.iter().enumerate() {
                         ui.label(&form.name);
-    
                         if ui.button("Open").clicked() {
                             self.form_index = Some(i);
                         }
@@ -69,11 +59,9 @@ impl EformApp {
                             delete_form = Some(i);
                             ui.close_menu();
                         }
-    
                         ui.end_row();
                     }
                 });
-    
                 if let Some(i) = delete_form {
                     self.forms.remove(i);
                 }
@@ -91,30 +79,28 @@ impl EformApp {
                 }
                 ui.text_edit_singleline(&mut self.forms[form_index].name);
             });
-
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.edit_tab, EditTab::Questions, "Questions");
-                if ui.selectable_value(&mut self.edit_tab, EditTab::Preview, "Preview").clicked() {
+                if ui
+                    .selectable_value(&mut self.edit_tab, EditTab::Preview, "Preview")
+                    .clicked()
+                {
                     self.reset_form_preview(form_index);
                 }
                 ui.selectable_value(&mut self.edit_tab, EditTab::Responses, "Responses");
                 ui.selectable_value(&mut self.edit_tab, EditTab::Settings, "Settings");
             });
         });
-
-        CentralPanel::default().show(ctx, |ui| {
-            match self.edit_tab {
-                EditTab::Questions => self.tab_questions(ui, form_index),
-                EditTab::Preview => self.tab_preview(ui, form_index),
-                EditTab::Responses => self.tab_responses(ui, form_index),
-                EditTab::Settings => self.tab_settings(ui, form_index),
-            }
+        CentralPanel::default().show(ctx, |ui| match self.edit_tab {
+            EditTab::Questions => self.tab_questions(ui, form_index),
+            EditTab::Preview => self.tab_preview(ui, form_index),
+            EditTab::Responses => self.tab_responses(ui, form_index),
+            EditTab::Settings => self.tab_settings(ui, form_index),
         });
     }
 
     pub fn tab_questions(&mut self, ui: &mut Ui, form_index: usize) {
         let mut delete_question = None;
-
         ScrollArea::vertical()
             .auto_shrink([false; 2])
             .show(ui, |ui| {
@@ -123,32 +109,31 @@ impl EformApp {
                         delete_question = Some(i);
                     }
                 }
-
                 if ui.button("Add question").clicked() {
                     self.forms[form_index].questions.push(Question::new());
                 }
 
                 ui.add_space(32.0);
             });
-
         if let Some(i) = delete_question {
             self.forms[form_index].questions.remove(i);
         }
     }
 
     pub fn tab_preview(&mut self, ui: &mut Ui, form_index: usize) {
-        ScrollArea::vertical().auto_shrink([false; 2]).show(ui, |ui| {
-            for question in self.forms[form_index].questions.iter_mut() {
-                question.preview(ui);
-            }
-
-            if ui.button("Submit").clicked() {
-                println!("{:#?}", self.forms[form_index]);
-            }
-            if ui.button("Clear form").clicked() {
-                self.reset_form_preview(form_index);
-            }
-        });
+        ScrollArea::vertical()
+            .auto_shrink([false; 2])
+            .show(ui, |ui| {
+                for question in self.forms[form_index].questions.iter_mut() {
+                    question.preview(ui);
+                }
+                if ui.button("Submit").clicked() {
+                    println!("{:#?}", self.forms[form_index]);
+                }
+                if ui.button("Clear form").clicked() {
+                    self.reset_form_preview(form_index);
+                }
+            });
     }
 
     fn reset_form_preview(&mut self, form_index: usize) {

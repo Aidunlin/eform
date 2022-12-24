@@ -1,5 +1,5 @@
 use super::types::*;
-use eframe::egui::{DragValue, TextEdit, Ui, Grid};
+use eframe::egui::{DragValue, Grid, TextEdit, Ui};
 
 #[derive(Clone, Debug)]
 pub enum QuestionData {
@@ -59,7 +59,6 @@ impl QuestionData {
                     ui.label("to");
                     ui.add(DragValue::new(&mut data.end).clamp_range(2..=10));
                 });
-
                 ui.horizontal(|ui| {
                     ui.label(format!("{}", data.start));
                     ui.add(
@@ -68,7 +67,6 @@ impl QuestionData {
                             .desired_width(100.0),
                     );
                 });
-
                 ui.horizontal(|ui| {
                     ui.label(format!("{}", data.end));
                     ui.add(
@@ -109,7 +107,6 @@ impl QuestionData {
                 } else {
                     data.choice.clone()
                 };
-
                 ui.menu_button(label, |ui| {
                     for option in data.options.iter() {
                         if ui
@@ -135,7 +132,6 @@ impl QuestionData {
                         ui.label(column);
                     }
                     ui.end_row();
-                    
                     for (y, row) in data.rows.iter().enumerate() {
                         ui.label(row);
                         for column in data.columns.iter() {
@@ -152,7 +148,6 @@ impl QuestionData {
                         ui.label(column);
                     }
                     ui.end_row();
-                    
                     for (y, row) in data.rows.iter().enumerate() {
                         ui.label(row);
                         for x in 0..data.columns.len() {
@@ -184,10 +179,16 @@ impl QuestionData {
                             DayPeriod::PM => "PM",
                         },
                         |ui| {
-                            if ui.selectable_value(&mut data.period, DayPeriod::AM, "AM").clicked() {
+                            if ui
+                                .selectable_value(&mut data.period, DayPeriod::AM, "AM")
+                                .clicked()
+                            {
                                 ui.close_menu();
                             }
-                            if ui.selectable_value(&mut data.period, DayPeriod::PM, "PM").clicked() {
+                            if ui
+                                .selectable_value(&mut data.period, DayPeriod::PM, "PM")
+                                .clicked()
+                            {
                                 ui.close_menu();
                             }
                         },
@@ -226,7 +227,6 @@ pub fn edit_grid(ui: &mut Ui, rows: &mut Vec<String>, columns: &mut Vec<String>)
 pub fn edit_options(ui: &mut Ui, options: &mut Vec<String>, label: impl Into<String>) {
     let label: String = label.into();
     ui.label(format!("{}s", label));
-
     let mut delete_option = None;
     for (i, option) in options.iter_mut().enumerate() {
         ui.horizontal(|ui| {
