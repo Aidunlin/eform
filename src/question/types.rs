@@ -108,11 +108,16 @@ impl Default for CheckboxGrid {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum DayPeriod {
-    #[default]
     AM,
     PM,
+}
+
+impl Default for DayPeriod {
+    fn default() -> Self {
+        Self::AM
+    }
 }
 
 #[derive(Clone, Debug, Default)]

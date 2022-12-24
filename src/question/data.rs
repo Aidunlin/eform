@@ -1,18 +1,19 @@
-use super::types::*;
-use eframe::egui::{DragValue, Grid, TextEdit, Ui};
+use eframe::egui;
+
+use super::types;
 
 #[derive(Clone, Debug)]
 pub enum QuestionData {
-    ShortAnswer(ShortAnswer),
-    Paragraph(Paragraph),
-    MultipleChoice(MultipleChoice),
-    Checkboxes(Checkboxes),
-    Dropdown(Dropdown),
-    LinearScale(LinearScale),
-    MultipleChoiceGrid(MultipleChoiceGrid),
-    CheckboxGrid(CheckboxGrid),
-    Date(Date),
-    Time(Time),
+    ShortAnswer(types::ShortAnswer),
+    Paragraph(types::Paragraph),
+    MultipleChoice(types::MultipleChoice),
+    Checkboxes(types::Checkboxes),
+    Dropdown(types::Dropdown),
+    LinearScale(types::LinearScale),
+    MultipleChoiceGrid(types::MultipleChoiceGrid),
+    CheckboxGrid(types::CheckboxGrid),
+    Date(types::Date),
+    Time(types::Time),
 }
 
 impl QuestionData {
@@ -33,20 +34,59 @@ impl QuestionData {
 
     pub fn types_list() -> Vec<Self> {
         vec![
-            Self::ShortAnswer(ShortAnswer::default()),
-            Self::Paragraph(Paragraph::default()),
-            Self::MultipleChoice(MultipleChoice::default()),
-            Self::Checkboxes(Checkboxes::default()),
-            Self::Dropdown(Dropdown::default()),
-            Self::LinearScale(LinearScale::default()),
-            Self::MultipleChoiceGrid(MultipleChoiceGrid::default()),
-            Self::CheckboxGrid(CheckboxGrid::default()),
-            Self::Date(Date::default()),
-            Self::Time(Time::default()),
+            Self::ShortAnswer(types::ShortAnswer::default()),
+            Self::Paragraph(types::Paragraph::default()),
+            Self::MultipleChoice(types::MultipleChoice::default()),
+            Self::Checkboxes(types::Checkboxes::default()),
+            Self::Dropdown(types::Dropdown::default()),
+            Self::LinearScale(types::LinearScale::default()),
+            Self::MultipleChoiceGrid(types::MultipleChoiceGrid::default()),
+            Self::CheckboxGrid(types::CheckboxGrid::default()),
+            Self::Date(types::Date::default()),
+            Self::Time(types::Time::default()),
         ]
     }
 
-    pub fn edit(&mut self, ui: &mut Ui) {
+    pub fn reset_value(&mut self) {
+        match self {
+            Self::ShortAnswer(data) => {
+                data.text = String::new();
+            }
+            Self::Paragraph(data) => {
+                data.text = String::new();
+            }
+            Self::MultipleChoice(data) => {
+                data.choice = String::new();
+            }
+            Self::Checkboxes(data) => {
+                data.choices = vec![false; data.options.len()];
+            }
+            Self::Dropdown(data) => {
+                data.choice = String::new();
+            }
+            Self::LinearScale(data) => {
+                data.value = data.start;
+            }
+            Self::MultipleChoiceGrid(data) => {
+                data.choices = vec![String::new(); data.rows.len()];
+            }
+            Self::CheckboxGrid(data) => {
+                data.choices = vec![vec![false; data.columns.len()]; data.rows.len()];
+            }
+            Self::Date(data) => {
+                data.year = 0;
+                data.month = 1;
+                data.day = 1;
+            }
+            Self::Time(data) => {
+                data.hour = 1;
+                data.minute = 0;
+                data.period = types::DayPeriod::AM;
+            }
+        }
+    }
+
+    pub fn edit(&mut self, ui: &mut egui::Ui) {
         match self {
             Self::ShortAnswer(_) => {}
             Self::Paragraph(_) => {}
@@ -55,14 +95,14 @@ impl QuestionData {
             Self::Dropdown(data) => edit_options(ui, &mut data.options, "Option"),
             Self::LinearScale(data) => {
                 ui.horizontal(|ui| {
-                    ui.add(DragValue::new(&mut data.start).clamp_range(0..=1));
+                    ui.add(egui::DragValue::new(&mut data.start).clamp_range(0..=1));
                     ui.label("to");
-                    ui.add(DragValue::new(&mut data.end).clamp_range(2..=10));
+                    ui.add(egui::DragValue::new(&mut data.end).clamp_range(2..=10));
                 });
                 ui.horizontal(|ui| {
                     ui.label(format!("{}", data.start));
                     ui.add(
-                        TextEdit::singleline(&mut data.start_label)
+                        egui::TextEdit::singleline(&mut data.start_label)
                             .hint_text("Label (optional)")
                             .desired_width(100.0),
                     );
@@ -70,7 +110,7 @@ impl QuestionData {
                 ui.horizontal(|ui| {
                     ui.label(format!("{}", data.end));
                     ui.add(
-                        TextEdit::singleline(&mut data.end_label)
+                        egui::TextEdit::singleline(&mut data.end_label)
                             .hint_text("Label (optional)")
                             .desired_width(100.0),
                     );
@@ -83,13 +123,13 @@ impl QuestionData {
         }
     }
 
-    pub fn preview(&mut self, ui: &mut Ui) {
+    pub fn preview(&mut self, ui: &mut egui::Ui) {
         match self {
             Self::ShortAnswer(data) => {
-                ui.add(TextEdit::singleline(&mut data.text).hint_text("Your answer"));
+                ui.add(egui::TextEdit::singleline(&mut data.text).hint_text("Your answer"));
             }
             Self::Paragraph(data) => {
-                ui.add(TextEdit::multiline(&mut data.text).hint_text("Your answer"));
+                ui.add(egui::TextEdit::multiline(&mut data.text).hint_text("Your answer"));
             }
             Self::MultipleChoice(data) => {
                 for option in data.options.iter() {
@@ -126,7 +166,7 @@ impl QuestionData {
                 });
             }
             Self::MultipleChoiceGrid(data) => {
-                Grid::new(ui.next_auto_id()).show(ui, |ui| {
+                egui::Grid::new(ui.next_auto_id()).show(ui, |ui| {
                     ui.label("");
                     for column in data.columns.iter() {
                         ui.label(column);
@@ -142,7 +182,7 @@ impl QuestionData {
                 });
             }
             Self::CheckboxGrid(data) => {
-                Grid::new(ui.next_auto_id()).show(ui, |ui| {
+                egui::Grid::new(ui.next_auto_id()).show(ui, |ui| {
                     ui.label("");
                     for column in data.columns.iter() {
                         ui.label(column);
@@ -160,33 +200,33 @@ impl QuestionData {
             Self::Date(data) => {
                 ui.label("MM  DD  YYYY");
                 ui.horizontal(|ui| {
-                    ui.add(DragValue::new(&mut data.month).clamp_range(1..=12));
+                    ui.add(egui::DragValue::new(&mut data.month).clamp_range(1..=12));
                     ui.label("/");
-                    ui.add(DragValue::new(&mut data.day).clamp_range(1..=31));
+                    ui.add(egui::DragValue::new(&mut data.day).clamp_range(1..=31));
                     ui.label("/");
-                    ui.add(DragValue::new(&mut data.year).clamp_range(0..=9999));
+                    ui.add(egui::DragValue::new(&mut data.year).clamp_range(0..=9999));
                 });
             }
             Self::Time(data) => {
                 ui.label("Time");
                 ui.horizontal(|ui| {
-                    ui.add(DragValue::new(&mut data.hour).clamp_range(1..=12));
+                    ui.add(egui::DragValue::new(&mut data.hour).clamp_range(1..=12));
                     ui.label(":");
-                    ui.add(DragValue::new(&mut data.minute).clamp_range(0..=59));
+                    ui.add(egui::DragValue::new(&mut data.minute).clamp_range(0..=59));
                     ui.menu_button(
                         match data.period {
-                            DayPeriod::AM => "AM",
-                            DayPeriod::PM => "PM",
+                            types::DayPeriod::AM => "AM",
+                            types::DayPeriod::PM => "PM",
                         },
                         |ui| {
                             if ui
-                                .selectable_value(&mut data.period, DayPeriod::AM, "AM")
+                                .selectable_value(&mut data.period, types::DayPeriod::AM, "AM")
                                 .clicked()
                             {
                                 ui.close_menu();
                             }
                             if ui
-                                .selectable_value(&mut data.period, DayPeriod::PM, "PM")
+                                .selectable_value(&mut data.period, types::DayPeriod::PM, "PM")
                                 .clicked()
                             {
                                 ui.close_menu();
@@ -217,20 +257,20 @@ impl PartialEq for QuestionData {
     }
 }
 
-pub fn edit_grid(ui: &mut Ui, rows: &mut Vec<String>, columns: &mut Vec<String>) {
+fn edit_grid(ui: &mut egui::Ui, rows: &mut Vec<String>, columns: &mut Vec<String>) {
     ui.horizontal(|ui| {
         ui.vertical(|ui| edit_options(ui, rows, "Row"));
         ui.vertical(|ui| edit_options(ui, columns, "Column"));
     });
 }
 
-pub fn edit_options(ui: &mut Ui, options: &mut Vec<String>, label: impl Into<String>) {
+fn edit_options(ui: &mut egui::Ui, options: &mut Vec<String>, label: impl Into<String>) {
     let label: String = label.into();
     ui.label(format!("{}s", label));
     let mut delete_option = None;
     for (i, option) in options.iter_mut().enumerate() {
         ui.horizontal(|ui| {
-            ui.add(TextEdit::singleline(option).desired_width(100.0));
+            ui.add(egui::TextEdit::singleline(option).desired_width(100.0));
             if ui.button("❌").clicked() {
                 delete_option = Some(i);
             }

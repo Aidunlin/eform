@@ -1,9 +1,7 @@
-use super::question::*;
-
 #[derive(Clone, Debug)]
 pub struct Form {
     pub name: String,
-    pub questions: Vec<Question>,
+    pub questions: Vec<crate::question::Question>,
 }
 
 impl Form {
