@@ -22,21 +22,6 @@ pub struct EformApp {
 }
 
 impl EformApp {
-    pub fn new() -> Self {
-        let mut form = crate::form::Form::new();
-        form.questions = crate::question::QuestionData::types_list()
-            .iter()
-            .map(|data| crate::question::Question {
-                name: "Question".into(),
-                data: data.clone(),
-            })
-            .collect();
-        Self {
-            forms: vec![form],
-            ..Default::default()
-        }
-    }
-
     fn main_menu(&mut self, ctx: &egui::Context) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.group(|ui| {
@@ -140,15 +125,15 @@ impl EformApp {
 
     fn reset_form_preview(&mut self, form_index: usize) {
         for question in self.forms[form_index].questions.iter_mut() {
-            question.data.reset_value();
+            question.reset_value();
         }
     }
 
-    fn tab_responses(&mut self, ui: &mut egui::Ui, form_index: usize) {
+    fn tab_responses(&mut self, ui: &mut egui::Ui, _: usize) {
         ui.heading("UNDER CONSTRUCTION");
     }
 
-    fn tab_settings(&mut self, ui: &mut egui::Ui, form_index: usize) {
+    fn tab_settings(&mut self, ui: &mut egui::Ui, _: usize) {
         ui.heading("UNDER CONSTRUCTION");
     }
 }
