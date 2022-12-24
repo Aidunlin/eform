@@ -95,7 +95,7 @@ impl Default for MultipleChoiceGrid {
 pub struct CheckboxGrid {
     pub rows: Vec<String>,
     pub columns: Vec<String>,
-    pub choices: Vec<Vec<String>>,
+    pub choices: Vec<Vec<bool>>,
 }
 
 impl Default for CheckboxGrid {
@@ -103,12 +103,12 @@ impl Default for CheckboxGrid {
         Self {
             rows: vec!["Row 1".into()],
             columns: vec!["Column 1".into()],
-            choices: vec![vec![]],
+            choices: vec![vec![false]],
         }
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub enum DayPeriod {
     #[default]
     AM,

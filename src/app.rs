@@ -1,5 +1,11 @@
 use super::form::*;
 use super::question::*;
+use eframe::egui::Direction;
+use eframe::egui::Layout;
+use eframe::egui::TopBottomPanel;
+use eframe::egui::emath::Vec2;
+use eframe::emath::Align;
+use eframe::epaint::Color32;
 use eframe::{
     egui::{CentralPanel, Context, Grid, ScrollArea, Ui},
     App, Frame,
@@ -37,69 +43,73 @@ impl EformApp {
         }
     }
 
-    pub fn main_menu(&mut self, ui: &mut Ui) {
-        ui.group(|ui| {
-            ui.heading("Start a new form");
-            if ui.button("Blank").clicked() {
-                self.forms.push(Form::new());
-                self.form_index = Some(self.forms.len() - 1);
-            }
-        });
-
-        ui.group(|ui| {
-            ui.heading("Forms");
-
-            let mut delete_form = None;
-
-            Grid::new("forms").striped(true).show(ui, |ui| {
-                for (i, form) in self.forms.iter().enumerate() {
-                    ui.label(&form.name);
-
-                    if ui.button("Open").clicked() {
-                        self.form_index = Some(i);
-                    }
-                    if ui.button("Delete").clicked() {
-                        delete_form = Some(i);
-                        ui.close_menu();
-                    }
-
-                    ui.end_row();
+    pub fn main_menu(&mut self, ctx: &Context) {
+        CentralPanel::default().show(ctx, |ui| {
+            ui.group(|ui| {
+                ui.heading("Start a new form");
+                if ui.button("Blank").clicked() {
+                    self.forms.push(Form::new());
+                    self.form_index = Some(self.forms.len() - 1);
                 }
             });
-
-            if let Some(i) = delete_form {
-                self.forms.remove(i);
-            }
+    
+            ui.group(|ui| {
+                ui.heading("Forms");
+    
+                let mut delete_form = None;
+    
+                Grid::new("forms").striped(true).show(ui, |ui| {
+                    for (i, form) in self.forms.iter().enumerate() {
+                        ui.label(&form.name);
+    
+                        if ui.button("Open").clicked() {
+                            self.form_index = Some(i);
+                        }
+                        if ui.button("❌").clicked() {
+                            delete_form = Some(i);
+                            ui.close_menu();
+                        }
+    
+                        ui.end_row();
+                    }
+                });
+    
+                if let Some(i) = delete_form {
+                    self.forms.remove(i);
+                }
+            });
         });
     }
 
-    pub fn edit_form(&mut self, ui: &mut Ui, form_index: usize) {
-        ui.group(|ui| {
+    pub fn edit_form(&mut self, ctx: &Context, form_index: usize) {
+        TopBottomPanel::top("top").show(ctx, |ui| {
+            ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
                 if ui.button("Back").clicked() {
                     self.edit_tab = EditTab::Questions;
                     self.form_index = None;
                 }
                 ui.text_edit_singleline(&mut self.forms[form_index].name);
-                if ui.button("Print").clicked() {
-                    println!("{:#?}", self.forms[form_index]);
-                }
             });
 
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.edit_tab, EditTab::Questions, "Questions");
-                ui.selectable_value(&mut self.edit_tab, EditTab::Preview, "Preview");
+                if ui.selectable_value(&mut self.edit_tab, EditTab::Preview, "Preview").clicked() {
+                    self.reset_form_preview(form_index);
+                }
                 ui.selectable_value(&mut self.edit_tab, EditTab::Responses, "Responses");
                 ui.selectable_value(&mut self.edit_tab, EditTab::Settings, "Settings");
             });
         });
 
-        match self.edit_tab {
-            EditTab::Questions => self.tab_questions(ui, form_index),
-            EditTab::Preview => self.tab_preview(ui, form_index),
-            EditTab::Responses => self.tab_responses(ui, form_index),
-            EditTab::Settings => self.tab_settings(ui, form_index),
-        }
+        CentralPanel::default().show(ctx, |ui| {
+            match self.edit_tab {
+                EditTab::Questions => self.tab_questions(ui, form_index),
+                EditTab::Preview => self.tab_preview(ui, form_index),
+                EditTab::Responses => self.tab_responses(ui, form_index),
+                EditTab::Settings => self.tab_settings(ui, form_index),
+            }
+        });
     }
 
     pub fn tab_questions(&mut self, ui: &mut Ui, form_index: usize) {
@@ -127,7 +137,24 @@ impl EformApp {
     }
 
     pub fn tab_preview(&mut self, ui: &mut Ui, form_index: usize) {
-        ui.heading("UNDER CONSTRUCTION");
+        ScrollArea::vertical().auto_shrink([false; 2]).show(ui, |ui| {
+            for question in self.forms[form_index].questions.iter_mut() {
+                question.preview(ui);
+            }
+
+            if ui.button("Submit").clicked() {
+                println!("{:#?}", self.forms[form_index]);
+            }
+            if ui.button("Clear form").clicked() {
+                self.reset_form_preview(form_index);
+            }
+        });
+    }
+
+    fn reset_form_preview(&mut self, form_index: usize) {
+        for question in self.forms[form_index].questions.iter_mut() {
+            question.reset_value();
+        }
     }
 
     pub fn tab_responses(&mut self, ui: &mut Ui, form_index: usize) {
@@ -141,9 +168,9 @@ impl EformApp {
 
 impl App for EformApp {
     fn update(&mut self, ctx: &Context, _: &mut Frame) {
-        CentralPanel::default().show(ctx, |ui| match self.form_index {
-            None => self.main_menu(ui),
-            Some(form_index) => self.edit_form(ui, form_index),
-        });
+        match self.form_index {
+            None => self.main_menu(ctx),
+            Some(form_index) => self.edit_form(ctx, form_index),
+        }
     }
 }
