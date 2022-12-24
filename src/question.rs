@@ -1,4 +1,5 @@
 use eframe::egui;
+use serde::{Deserialize, Serialize};
 
 mod config;
 mod config_types;
@@ -8,7 +9,7 @@ mod value_types;
 use config::QuestionConfig;
 use value::QuestionValue;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Question {
     pub name: String,
     pub config: QuestionConfig,

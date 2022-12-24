@@ -1,8 +1,9 @@
 use eframe::egui;
+use serde::{Deserialize, Serialize};
 
 use super::config_types;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum QuestionConfig {
     ShortAnswer(config_types::ShortAnswerConfig),
     Paragraph(config_types::ParagraphConfig),

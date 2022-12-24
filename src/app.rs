@@ -1,6 +1,7 @@
 use eframe::egui;
+use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Serialize, Deserialize)]
 enum EditTab {
     Questions,
     Preview,
@@ -14,7 +15,7 @@ impl Default for EditTab {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct EformApp {
     forms: Vec<crate::form::Form>,
     form_index: Option<usize>,
@@ -22,6 +23,19 @@ pub struct EformApp {
 }
 
 impl EformApp {
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        let Some(storage) = cc.storage else {
+            return Self::default();
+        };
+        let Some(data) = storage.get_string("data") else {
+            return Self::default();
+        };
+        let Ok(app) = serde_json::from_str(&data) else {
+            return Self::default();
+        };
+        app
+    }
+
     fn main_menu(&mut self, ctx: &egui::Context) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.group(|ui| {
@@ -144,5 +158,9 @@ impl eframe::App for EformApp {
             None => self.main_menu(ctx),
             Some(form_index) => self.edit_form(ctx, form_index),
         }
+    }
+
+    fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        storage.set_string("data", serde_json::to_string(self).unwrap());
     }
 }

@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use super::value_types;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum QuestionValue {
     ShortAnswer(value_types::ShortAnswerValue),
     Paragraph(value_types::ParagraphValue),

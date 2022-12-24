@@ -8,3 +8,9 @@ edition = "2021"
 [dependencies.eframe]
 version = "0.20.1"
 features = ["persistence", "dark-light"]
+
+[dependencies.serde]
+version = "1.0.151"
+
+[dependencies.serde_json]
+version = "1.0.91"
