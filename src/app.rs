@@ -23,7 +23,7 @@ pub struct EformApp {
 }
 
 impl EformApp {
-    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let Some(storage) = cc.storage else {
             return Self::default();
         };
@@ -34,6 +34,14 @@ impl EformApp {
             return Self::default();
         };
         app
+    }
+
+    pub fn run() {
+        eframe::run_native(
+            "eform",
+            eframe::NativeOptions::default(),
+            Box::new(|cc| Box::new(Self::new(cc))),
+        );
     }
 
     fn main_menu(&mut self, ctx: &egui::Context) {

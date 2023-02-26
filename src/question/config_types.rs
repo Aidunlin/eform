@@ -22,14 +22,14 @@ pub struct DropdownConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LinearScaleScale {
+pub struct LinearScaleConfig {
     pub start: usize,
     pub start_label: String,
     pub end: usize,
     pub end_label: String,
 }
 
-impl Default for LinearScaleScale {
+impl Default for LinearScaleConfig {
     fn default() -> Self {
         Self {
             start: 1,
