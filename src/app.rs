@@ -27,13 +27,11 @@ impl EformApp {
         let Some(storage) = cc.storage else {
             return Self::default();
         };
-        let Some(data) = storage.get_string("data") else {
-            return Self::default();
-        };
-        let Ok(app) = serde_json::from_str(&data) else {
-            return Self::default();
-        };
-        app
+
+        match eframe::get_value(storage, "data") {
+            None => Self::default(),
+            Some(data) => data,
+        }
     }
 
     pub fn run() {
@@ -41,7 +39,7 @@ impl EformApp {
             "eform",
             eframe::NativeOptions::default(),
             Box::new(|cc| Box::new(Self::new(cc))),
-        );
+        ).unwrap();
     }
 
     fn main_menu(&mut self, ctx: &egui::Context) {
@@ -169,6 +167,6 @@ impl eframe::App for EformApp {
     }
 
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        storage.set_string("data", serde_json::to_string(self).unwrap());
+        eframe::set_value(storage, "data", self);
     }
 }
