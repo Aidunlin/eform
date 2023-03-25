@@ -1,4 +1,4 @@
-use super::Feedback;
+use super::feedback::Feedback;
 
 /// A Google Forms document. A form is created in Drive, and deleting a form or changing its access protections is done via the [Drive API](https://developers.google.com/drive/api/v3/about-sdk).
 pub struct Form {
@@ -126,6 +126,9 @@ pub struct Question {
 }
 
 impl Question {
+    /// Read only. The question ID.
+    ///
+    /// On creation, it can be provided but the ID must not be already used in the form. If not provided, a new ID is assigned.
     pub fn question_id(&self) -> String {
         self.question_id.clone()
     }
@@ -216,6 +219,7 @@ pub struct Image {
 }
 
 impl Image {
+    /// Output only. A URI from which you can download the image; this is valid only for a limited time.
     pub fn content_uri(&self) -> String {
         self.content_uri.clone()
     }
@@ -388,10 +392,13 @@ pub struct Video {
 }
 
 /// Change the form with a batch of updates.
-/// 
+///
 /// * `form_id` - Required. The form ID.
 /// * `request` - Request body.
-pub fn batch_update(form_id: String, request: BatchUpdateFormRequest) -> Result<BatchUpdateFormResponse, ()> {
+pub fn batch_update(
+    form_id: String,
+    request: BatchUpdateFormRequest,
+) -> Result<BatchUpdateFormResponse, ()> {
     Err(())
 }
 
@@ -534,16 +541,16 @@ pub struct CreateItemResponse {
 }
 
 /// Create a new form using the title given in the provided form message in the request.
-/// 
+///
 /// Important: Only the [`form.info.title`](https://developers.google.com/forms/api/reference/rest/v1/forms#Info.FIELDS.title) and [`form.info.document_title`](https://developers.google.com/forms/api/reference/rest/v1/forms#Info.FIELDS.title) fields are copied to the new form. All other fields including the form description, items and settings are disallowed. To create a new form and add items, you must first call [`forms.create`](https://developers.google.com/forms/api/reference/rest/v1/forms/create#google.apps.forms.v1.FormsService.CreateForm) to create an empty form with a title and (optional) document title, and then call [`forms.update`](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#google.apps.forms.v1.FormsService.BatchUpdateForm) to add the items.
-/// 
+///
 /// * `request` - Request body.
 pub fn create(request: Form) -> Result<Form, ()> {
     Err(())
 }
 
 /// Get a form.
-/// 
+///
 /// * `form_id` - Required. The form ID.
 pub fn get(form_id: String) -> Result<Form, ()> {
     Err(())

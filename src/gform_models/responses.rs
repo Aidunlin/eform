@@ -1,4 +1,4 @@
-use super::Feedback;
+use super::feedback::Feedback;
 
 /// A form response.
 pub struct FormResponse {
@@ -194,7 +194,7 @@ impl FileUploadAnswer {
     pub fn file_name(&self) -> String {
         self.file_name.clone()
     }
-    
+
     /// Output only. The MIME type of the file, as stored in Google Drive on upload.
     pub fn mime_type(&self) -> String {
         self.mime_type.clone()
