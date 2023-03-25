@@ -1,10 +1,13 @@
+use serde::{Deserialize, Serialize};
+
 /// A watch for events for a form. When the designated event happens, a notification will be published to the specified target. The notification's attributes will include a `formId` key that has the ID of the watched form and an `eventType` key that has the string of the type.
 ///
 /// Messages are sent with at-least-once delivery and are only dropped in extraordinary circumstances. Typically all notifications should be reliably delivered within a few seconds; however, in some situations notifications may be delayed.
 ///
 /// A watch expires seven days after it is created unless it is renewed with [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch).
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#resource:-watch)
+#[derive(Serialize, Deserialize)]
 pub struct Watch {
     /// Output only. The ID of this watch. See notes on [`CreateWatchRequest.watch_id`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/create#body.request_body.FIELDS.watch_id).
     id: String,
@@ -58,8 +61,9 @@ impl Watch {
 }
 
 /// The target for notification delivery.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#watchtarget)
+#[derive(Serialize, Deserialize)]
 pub struct WatchTarget {
     /// A Pub/Sub topic. To receive notifications, the topic must grant publish privileges to the Forms service account `serviceAccount:forms-notifications@system.gserviceaccount.com`. Only the project that owns a topic may create a watch with it.
     ///
@@ -68,16 +72,18 @@ pub struct WatchTarget {
 }
 
 /// A Pub/Sub topic.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#cloudpubsubtopic)
+#[derive(Serialize, Deserialize)]
 pub struct CloudPubsubTopic {
     /// Required. A fully qualified Pub/Sub topic name to publish the events to. This topic must be owned by the calling project and already exist in Pub/Sub.
     pub topic_name: String,
 }
 
 /// Possible event types that can be watched.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#eventtype)
+#[derive(Serialize, Deserialize)]
 pub enum EventType {
     /// Unspecified event type. This value should not be used.
     EventTypeUnspecified,
@@ -88,9 +94,9 @@ pub enum EventType {
 }
 
 /// Possible error types.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#errortype)
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Serialize)]
 pub enum ErrorType {
     /// Unspecified error type.
     ErrorTypeUnspecified,
@@ -103,9 +109,9 @@ pub enum ErrorType {
 }
 
 /// Possible Watch states.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#state)
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Serialize)]
 pub enum State {
     /// Unspecified state.
     StateUnspecified,
@@ -119,15 +125,16 @@ pub enum State {
 ///
 /// * `form_id` - Required. ID of the Form to watch.
 /// * `request` - The request body.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/create)
 pub fn create(form_id: String, request: CreateWatchRequest) -> Result<Watch, ()> {
     Err(())
 }
 
 /// Request body for `create`.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/create#request-body)
+#[derive(Serialize, Deserialize)]
 pub struct CreateWatchRequest {
     /// Required. The watch object. No ID should be set on this object; use watchId instead.
     pub watch: Watch,
@@ -139,7 +146,7 @@ pub struct CreateWatchRequest {
 ///
 /// * `form_id` - Required. The ID of the Form.
 /// * `watch_id` - Required. The ID of the Watch to delete.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/delete)
 pub fn delete(form_id: String, watch_id: String) -> Result<(), ()> {
     Err(())
@@ -148,15 +155,16 @@ pub fn delete(form_id: String, watch_id: String) -> Result<(), ()> {
 /// Return a list of the watches owned by the invoking project. The maximum number of watches is two: For each invoker, the limit is one for each event type per form.
 ///
 /// * `form_id` - Required. The ID of the Form.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/list)
 pub fn list(form_id: String) -> Result<ListWatchesResponse, ()> {
     Err(())
 }
 
 /// Response body for `list`.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/list#response-body)
+#[derive(Serialize, Deserialize)]
 pub struct ListWatchesResponse {
     /// The returned watches.
     pub watches: Vec<Watch>,
@@ -166,7 +174,7 @@ pub struct ListWatchesResponse {
 ///
 /// * `form_id` - Required. The ID of the Form.
 /// * `watch_id` - Required. The ID of the Watch to renew.
-/// 
+///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew)
 pub fn renew(form_id: String, watch_id: String) -> Result<Watch, ()> {
     Err(())

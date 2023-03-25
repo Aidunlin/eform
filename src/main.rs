@@ -1,3 +1,3 @@
 fn main() {
-    eform::EformApp::run();
+    eform::App::run();
 }

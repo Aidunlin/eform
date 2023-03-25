@@ -5,10 +5,12 @@ pub mod responses;
 pub mod watches;
 
 pub mod feedback {
+    use serde::{Deserialize, Serialize};
+
     /// Feedback for a respondent about their response to a question.
-    /// 
+    ///
     /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback)
-    #[derive(Clone)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub struct Feedback {
         /// Required. The main text of the feedback.
         pub text: String,
@@ -17,18 +19,18 @@ pub mod feedback {
     }
 
     /// Supplementary material to the feedback.
-    /// 
+    ///
     /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback#extramaterial)
-    #[derive(Clone)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub struct ExtraMaterial {
         /// Required. The contents of the extra material.
         pub content: ContentType,
     }
 
     /// The contents of the extra material.
-    /// 
+    ///
     /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback#extramaterial)
-    #[derive(Clone)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub enum ContentType {
         /// Text feedback.
         Link(TextLink),
@@ -37,9 +39,9 @@ pub mod feedback {
     }
 
     /// Link for text.
-    /// 
+    ///
     /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback#textlink)
-    #[derive(Clone)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub struct TextLink {
         /// Required. The URI.
         pub uri: String,
@@ -48,9 +50,9 @@ pub mod feedback {
     }
 
     /// Link to a video.
-    /// 
+    ///
     /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback#videolink)
-    #[derive(Clone)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub struct VideoLink {
         /// Required. The display text for the link.
         pub display_text: String,
