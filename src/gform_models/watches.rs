@@ -3,13 +3,13 @@
 /// Messages are sent with at-least-once delivery and are only dropped in extraordinary circumstances. Typically all notifications should be reliably delivered within a few seconds; however, in some situations notifications may be delayed.
 /// 
 /// A watch expires seven days after it is created unless it is renewed with [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch).
-struct Watch {
+pub struct Watch {
     /// Output only. The ID of this watch. See notes on [`CreateWatchRequest.watch_id`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/create#body.request_body.FIELDS.watch_id).
     id: String,
     /// Required. Where to send the notification.
-    target: WatchTarget,
+    pub target: WatchTarget,
     /// Required. Which event type to watch for.
-    event_type: EventType,
+    pub event_type: EventType,
     /// Output only. Timestamp of when this was created.
     /// 
     /// A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: `"2014-10-02T15:01:23Z"` and `"2014-10-02T15:01:23.045123456Z"`.
@@ -24,22 +24,53 @@ struct Watch {
     state: State,
 }
 
+impl Watch {
+    /// Output only. The ID of this watch. See notes on [`CreateWatchRequest.watch_id`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/create#body.request_body.FIELDS.watch_id).
+    pub fn id(&self) -> String {
+        self.id.clone()
+    }
+
+    /// Output only. Timestamp of when this was created.
+    /// 
+    /// A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: `"2014-10-02T15:01:23Z"` and `"2014-10-02T15:01:23.045123456Z"`.
+    pub fn create_time(&self) -> String {
+        self.create_time.clone()
+    }
+
+    /// Output only. Timestamp for when this will expire. Each [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch) call resets this to seven days in the future.
+    /// 
+    /// A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: `"2014-10-02T15:01:23Z"` and `"2014-10-02T15:01:23.045123456Z"`.
+    pub fn expire_time(&self) -> String {
+        self.expire_time.clone()
+    }
+
+    /// Output only. The most recent error type for an attempted delivery. To begin watching the form again a call can be made to [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch) which also clears this error information.
+    pub fn error_type(&self) -> ErrorType {
+        self.error_type.clone()
+    }
+
+    /// Output only. The current state of the watch. Additional details about suspended watches can be found by checking the `errorType`.
+    pub fn state(&self) -> State {
+        self.state.clone()
+    }
+}
+
 /// The target for notification delivery.
-struct WatchTarget {
+pub struct WatchTarget {
     /// A Pub/Sub topic. To receive notifications, the topic must grant publish privileges to the Forms service account `serviceAccount:forms-notifications@system.gserviceaccount.com`. Only the project that owns a topic may create a watch with it.
     /// 
     /// Pub/Sub delivery guarantees should be considered.
-    topic: CloudPubsubTopic,
+    pub topic: CloudPubsubTopic,
 }
 
 /// A Pub/Sub topic.
-struct CloudPubsubTopic {
+pub struct CloudPubsubTopic {
     /// Required. A fully qualified Pub/Sub topic name to publish the events to. This topic must be owned by the calling project and already exist in Pub/Sub.
-    topic_name: String,
+    pub topic_name: String,
 }
 
 /// Possible event types that can be watched.
-enum EventType {
+pub enum EventType {
     /// Unspecified event type. This value should not be used.
     EventTypeUnspecified,
     /// The schema event type. A watch with this event type will be notified about changes to form content and settings.
@@ -49,7 +80,8 @@ enum EventType {
 }
 
 /// Possible error types.
-enum ErrorType {
+#[derive(Clone)]
+pub enum ErrorType {
     /// Unspecified error type.
     ErrorTypeUnspecified,
     /// The cloud project does not have access to the form being watched. This occurs if the user has revoked the authorization for your project to access their form(s). Watches with this error will not be retried. To attempt to begin watching the form again a call can be made to [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch).
@@ -61,7 +93,8 @@ enum ErrorType {
 }
 
 /// Possible Watch states.
-enum State {
+#[derive(Clone)]
+pub enum State {
     /// Unspecified state.
     StateUnspecified,
     /// Watch is active.
@@ -74,43 +107,43 @@ enum State {
 /// 
 /// * `form_id` - Required. ID of the Form to watch.
 /// * `request` - The request body.
-fn create(form_id: String, request: CreateWatchRequest) -> Result<Watch, ()> {
+pub fn create(form_id: String, request: CreateWatchRequest) -> Result<Watch, ()> {
     Err(())
 }
 
 /// Request body for `create`.
-struct CreateWatchRequest {
+pub struct CreateWatchRequest {
     /// Required. The watch object. No ID should be set on this object; use watchId instead.
-    watch: Watch,
+    pub watch: Watch,
     /// The ID to use for the watch. If specified, the ID must not already be in use. If not specified, an ID is generated. This value should be 4-63 characters, and valid characters are /[a-z][0-9]-/.
-    watch_id: String,
+    pub watch_id: String,
 }
 
 /// Delete a watch.
 /// 
 /// * `form_id` - Required. The ID of the Form.
 /// * `watch_id` - Required. The ID of the Watch to delete.
-fn delete(form_id: String, watch_id: String) -> Result<(), ()> {
+pub fn delete(form_id: String, watch_id: String) -> Result<(), ()> {
     Err(())
 }
 
 /// Return a list of the watches owned by the invoking project. The maximum number of watches is two: For each invoker, the limit is one for each event type per form.
 /// 
 /// * `form_id` - Required. The ID of the Form.
-fn list(form_id: String) -> Result<ListWatchesResponse, ()> {
+pub fn list(form_id: String) -> Result<ListWatchesResponse, ()> {
     Err(())
 }
 
 /// Response body for `list`.
-struct ListWatchesResponse {
+pub struct ListWatchesResponse {
     /// The returned watches.
-    watches: Vec<Watch>,
+    pub watches: Vec<Watch>,
 }
 
 /// Renew an existing watch for seven days. The [`state`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#Watch.FIELDS.state) of the watch after renewal is `ACTIVE`, and the `expireTime` is seven days from the renewal. Renewing a watch in an error state (e.g. `SUSPENDED`) succeeds if the error is no longer present, but fail otherwise. After a watch has expired, watches.renew returns `NOT_FOUND`.
 /// 
 /// * `form_id` - Required. The ID of the Form.
 /// * `watch_id` - Required. The ID of the Watch to renew.
-fn renew(form_id: String, watch_id: String) -> Result<Watch, ()> {
+pub fn renew(form_id: String, watch_id: String) -> Result<Watch, ()> {
     Err(())
 }

@@ -1,25 +1,28 @@
 //! Contains data models from the [Google Forms API](https://developers.google.com/forms/api/reference/rest).
 
-mod forms;
-mod responses;
-mod watches;
+pub mod forms;
+pub mod responses;
+pub mod watches;
 
 /// Feedback for a respondent about their response to a question.
-struct Feedback {
+#[derive(Clone)]
+pub struct Feedback {
     /// Required. The main text of the feedback.
-    text: String,
+    pub text: String,
     /// Additional information provided as part of the feedback, often used to point the respondent to more reading and resources.
-    material: Vec<ExtraMaterial>,
+    pub material: Vec<ExtraMaterial>,
 }
 
 /// Supplementary material to the feedback.
-struct ExtraMaterial {
+#[derive(Clone)]
+pub struct ExtraMaterial {
     /// Required. The contents of the extra material.
-    content: ContentType,
+    pub content: ContentType,
 }
 
 /// The contents of the extra material.
-enum ContentType {
+#[derive(Clone)]
+pub enum ContentType {
     /// Text feedback.
     Link(TextLink),
     /// Video feedback.
@@ -27,17 +30,19 @@ enum ContentType {
 }
 
 /// Link for text.
-struct TextLink {
+#[derive(Clone)]
+pub struct TextLink {
     /// Required. The URI.
-    uri: String,
+    pub uri: String,
     /// Required. Display text for the URI.
-    display_text: String,
+    pub display_text: String,
 }
 
 /// Link to a video.
-struct VideoLink {
+#[derive(Clone)]
+pub struct VideoLink {
     /// Required. The display text for the link.
-    display_text: String,
+    pub display_text: String,
     /// The URI of a YouTube video.
-    youtube_uri: String,
+    pub youtube_uri: String,
 }
