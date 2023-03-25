@@ -6,6 +6,8 @@ pub mod watches;
 
 pub mod feedback {
     /// Feedback for a respondent about their response to a question.
+    /// 
+    /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback)
     #[derive(Clone)]
     pub struct Feedback {
         /// Required. The main text of the feedback.
@@ -15,6 +17,8 @@ pub mod feedback {
     }
 
     /// Supplementary material to the feedback.
+    /// 
+    /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback#extramaterial)
     #[derive(Clone)]
     pub struct ExtraMaterial {
         /// Required. The contents of the extra material.
@@ -22,6 +26,8 @@ pub mod feedback {
     }
 
     /// The contents of the extra material.
+    /// 
+    /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback#extramaterial)
     #[derive(Clone)]
     pub enum ContentType {
         /// Text feedback.
@@ -31,6 +37,8 @@ pub mod feedback {
     }
 
     /// Link for text.
+    /// 
+    /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback#textlink)
     #[derive(Clone)]
     pub struct TextLink {
         /// Required. The URI.
@@ -40,6 +48,8 @@ pub mod feedback {
     }
 
     /// Link to a video.
+    /// 
+    /// [View API](https://developers.google.com/forms/api/reference/rest/v1/Feedback#videolink)
     #[derive(Clone)]
     pub struct VideoLink {
         /// Required. The display text for the link.

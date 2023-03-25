@@ -1,6 +1,8 @@
 use super::feedback::Feedback;
 
 /// A form response.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#resource:-formresponse)
 pub struct FormResponse {
     /// Output only. The form ID.
     form_id: String,
@@ -63,6 +65,7 @@ impl FormResponse {
     }
 }
 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#resource:-formresponse)
 #[derive(Clone)]
 pub struct AnswerKeyValue {
     key: String,
@@ -70,6 +73,8 @@ pub struct AnswerKeyValue {
 }
 
 /// The submitted answer for a question.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#answer)
 #[derive(Clone)]
 pub struct Answer {
     /// Output only. The question's ID. See also [`Question.question_id`](https://developers.google.com/forms/api/reference/rest/v1/forms#Question.FIELDS.question_id).
@@ -93,6 +98,8 @@ impl Answer {
 }
 
 /// The user's answer.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#answer)
 #[derive(Clone)]
 pub enum Value {
     /// Output only. The specific answers as text.
@@ -102,6 +109,8 @@ pub enum Value {
 }
 
 /// A question's answers as text.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#textanswers)
 #[derive(Clone)]
 pub struct TextAnswers {
     /// Output only. Answers to a question. For multiple-value [`ChoiceQuestions`](https://developers.google.com/forms/api/reference/rest/v1/forms#ChoiceQuestion), each answer is a separate value.
@@ -116,6 +125,8 @@ impl TextAnswers {
 }
 
 /// An answer to a question represented as text.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#textanswer)
 #[derive(Clone)]
 pub struct TextAnswer {
     /// Output only. The answer value.
@@ -160,6 +171,8 @@ impl TextAnswer {
 }
 
 /// All submitted files for a FileUpload question.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#fileuploadanswers)
 #[derive(Clone)]
 pub struct FileUploadAnswers {
     /// Output only. All submitted files for a FileUpload question.
@@ -174,6 +187,8 @@ impl FileUploadAnswers {
 }
 
 /// Info for a single file submitted to a file upload question.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#fileuploadanswer)
 #[derive(Clone)]
 pub struct FileUploadAnswer {
     /// Output only. The ID of the Google Drive file.
@@ -202,6 +217,8 @@ impl FileUploadAnswer {
 }
 
 /// Grade information associated with a respondent's answer to a question.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#grade)
 #[derive(Clone)]
 pub struct Grade {
     /// Output only. The numeric score awarded for the answer.
@@ -233,6 +250,8 @@ impl Grade {
 ///
 /// * `form_id` - Required. The form ID.
 /// * `response_id` - Required. The response ID within the form.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses/get)
 pub fn get(form_id: String, response_id: String) -> Result<FormResponse, ()> {
     Err(())
 }
@@ -241,10 +260,13 @@ pub fn get(form_id: String, response_id: String) -> Result<FormResponse, ()> {
 ///
 /// * `form_id` - Required. ID of the Form whose responses to list.
 /// * `query` - Query parameters.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses/list)
 pub fn list(form_id: String, query: Query) -> Result<ListFormResponsesResponse, ()> {
     Err(())
 }
 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses/list#query-parameters)
 pub struct Query {
     /// Which form responses to return. Currently, the only supported filters are:
     ///
@@ -265,6 +287,8 @@ pub struct Query {
 }
 
 /// Reponse body for `list`.
+/// 
+/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses/list#response-body)
 pub struct ListFormResponsesResponse {
     /// The returned form responses. Note: The `formId` field is not returned in the `FormResponse` object for list requests.
     pub responses: Vec<FormResponse>,
