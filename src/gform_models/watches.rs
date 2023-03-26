@@ -7,10 +7,10 @@ use serde::{Deserialize, Serialize};
 /// A watch expires seven days after it is created unless it is renewed with [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch).
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#resource:-watch)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Watch {
     /// Output only. The ID of this watch. See notes on [`CreateWatchRequest.watch_id`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/create#body.request_body.FIELDS.watch_id).
-    id: String,
+    pub id: String,
     /// Required. Where to send the notification.
     pub target: WatchTarget,
     /// Required. Which event type to watch for.
@@ -18,52 +18,21 @@ pub struct Watch {
     /// Output only. Timestamp of when this was created.
     ///
     /// A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: `"2014-10-02T15:01:23Z"` and `"2014-10-02T15:01:23.045123456Z"`.
-    create_time: String,
+    pub create_time: String,
     /// Output only. Timestamp for when this will expire. Each [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch) call resets this to seven days in the future.
     ///
     /// A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: `"2014-10-02T15:01:23Z"` and `"2014-10-02T15:01:23.045123456Z"`.
-    expire_time: String,
+    pub expire_time: String,
     /// Output only. The most recent error type for an attempted delivery. To begin watching the form again a call can be made to [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch) which also clears this error information.
-    error_type: ErrorType,
+    pub error_type: ErrorType,
     /// Output only. The current state of the watch. Additional details about suspended watches can be found by checking the `errorType`.
-    state: State,
-}
-
-impl Watch {
-    /// Output only. The ID of this watch. See notes on [`CreateWatchRequest.watch_id`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/create#body.request_body.FIELDS.watch_id).
-    pub fn id(&self) -> String {
-        self.id.clone()
-    }
-
-    /// Output only. Timestamp of when this was created.
-    ///
-    /// A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: `"2014-10-02T15:01:23Z"` and `"2014-10-02T15:01:23.045123456Z"`.
-    pub fn create_time(&self) -> String {
-        self.create_time.clone()
-    }
-
-    /// Output only. Timestamp for when this will expire. Each [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch) call resets this to seven days in the future.
-    ///
-    /// A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: `"2014-10-02T15:01:23Z"` and `"2014-10-02T15:01:23.045123456Z"`.
-    pub fn expire_time(&self) -> String {
-        self.expire_time.clone()
-    }
-
-    /// Output only. The most recent error type for an attempted delivery. To begin watching the form again a call can be made to [`watches.renew`](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/renew#google.apps.forms.v1.FormsService.RenewWatch) which also clears this error information.
-    pub fn error_type(&self) -> ErrorType {
-        self.error_type.clone()
-    }
-
-    /// Output only. The current state of the watch. Additional details about suspended watches can be found by checking the `errorType`.
-    pub fn state(&self) -> State {
-        self.state.clone()
-    }
+    pub state: State,
 }
 
 /// The target for notification delivery.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#watchtarget)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct WatchTarget {
     /// A Pub/Sub topic. To receive notifications, the topic must grant publish privileges to the Forms service account `serviceAccount:forms-notifications@system.gserviceaccount.com`. Only the project that owns a topic may create a watch with it.
     ///
@@ -74,7 +43,7 @@ pub struct WatchTarget {
 /// A Pub/Sub topic.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#cloudpubsubtopic)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CloudPubsubTopic {
     /// Required. A fully qualified Pub/Sub topic name to publish the events to. This topic must be owned by the calling project and already exist in Pub/Sub.
     pub topic_name: String,
@@ -83,7 +52,7 @@ pub struct CloudPubsubTopic {
 /// Possible event types that can be watched.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches#eventtype)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum EventType {
     /// Unspecified event type. This value should not be used.
     EventTypeUnspecified,
@@ -134,7 +103,7 @@ pub fn create(form_id: String, request: CreateWatchRequest) -> Result<Watch, ()>
 /// Request body for `create`.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/create#request-body)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CreateWatchRequest {
     /// Required. The watch object. No ID should be set on this object; use watchId instead.
     pub watch: Watch,
@@ -164,7 +133,7 @@ pub fn list(form_id: String) -> Result<ListWatchesResponse, ()> {
 /// Response body for `list`.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.watches/list#response-body)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ListWatchesResponse {
     /// The returned watches.
     pub watches: Vec<Watch>,

@@ -5,10 +5,10 @@ use super::feedback::Feedback;
 /// A Google Forms document. A form is created in Drive, and deleting a form or changing its access protections is done via the [Drive API](https://developers.google.com/drive/api/v3/about-sdk).
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#resource:-form)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Form {
     /// Output only. The form ID.
-    form_id: String,
+    pub form_id: String,
     /// Required. The title and description of the form.
     pub info: Info,
     /// The form's settings. This must be updated with [`UpdateSettingsRequest`](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#UpdateSettingsRequest); it is ignored during `forms.create` and  [`UpdateFormInfoRequest`](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#UpdateFormInfoRequest).
@@ -18,61 +18,30 @@ pub struct Form {
     /// Output only. The revision ID of the form. Used in the [`WriteControl`](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#WriteControl) in update requests to identify the revision on which the changes are based.
     ///
     /// The format of the revision ID may change over time, so it should be treated opaquely. A returned revision ID is only guaranteed to be valid for 24 hours after it has been returned and cannot be shared across users. If the revision ID is unchanged between calls, then the form has not changed. Conversely, a changed ID (for the same form and user) usually means the form has been updated; however, a changed ID can also be due to internal factors such as ID format changes.
-    revision_id: String,
+    pub revision_id: String,
     /// Output only. The form URI to share with responders. This opens a page that allows the user to submit responses but not edit the questions.
-    responder_uri: String,
+    pub responder_uri: String,
     /// Output only. The ID of the linked Google Sheet which is accumulating responses from this Form (if such a Sheet exists).
-    linked_sheet_id: String,
-}
-
-impl Form {
-    /// Output only. The form ID.
-    pub fn form_id(&self) -> String {
-        self.form_id.clone()
-    }
-
-    /// Output only. The revision ID of the form. Used in the [`WriteControl`](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#WriteControl) in update requests to identify the revision on which the changes are based.
-    ///
-    /// The format of the revision ID may change over time, so it should be treated opaquely. A returned revision ID is only guaranteed to be valid for 24 hours after it has been returned and cannot be shared across users. If the revision ID is unchanged between calls, then the form has not changed. Conversely, a changed ID (for the same form and user) usually means the form has been updated; however, a changed ID can also be due to internal factors such as ID format changes.
-    pub fn revision_id(&self) -> String {
-        self.revision_id.clone()
-    }
-
-    /// Output only. The form URI to share with responders. This opens a page that allows the user to submit responses but not edit the questions.
-    pub fn responder_uri(&self) -> String {
-        self.responder_uri.clone()
-    }
-
-    /// Output only. The ID of the linked Google Sheet which is accumulating responses from this Form (if such a Sheet exists).
-    pub fn linked_sheet_id(&self) -> String {
-        self.linked_sheet_id.clone()
-    }
+    pub linked_sheet_id: String,
 }
 
 /// The general information for a form.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#info)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Info {
     /// Required. The title of the form which is visible to responders.
     pub title: String,
     /// Output only. The title of the document which is visible in Drive. If `Info.title` is empty, `documentTitle` may appear in its place in the Google Forms UI and be visible to responders. `documentTitle` can be set on create, but cannot be modified by a batchUpdate request. Please use the [Google Drive API](https://developers.google.com/drive/api/v3/reference/files/update) if you need to programmatically update `documentTitle`.
-    document_title: String,
+    pub document_title: String,
     /// The description of the form.
     pub description: String,
-}
-
-impl Info {
-    /// Output only. The title of the document which is visible in Drive. If `Info.title` is empty, `documentTitle` may appear in its place in the Google Forms UI and be visible to responders. `documentTitle` can be set on create, but cannot be modified by a batchUpdate request. Please use the [Google Drive API](https://developers.google.com/drive/api/v3/reference/files/update) if you need to programmatically update `documentTitle`.
-    pub fn document_title(&self) -> String {
-        self.document_title.clone()
-    }
 }
 
 /// A form's settings.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#formsettings)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FormSettings {
     /// Settings related to quiz forms and grading.
     pub quiz_settings: QuizSettings,
@@ -81,7 +50,7 @@ pub struct FormSettings {
 /// Settings related to quiz forms and grading. These must be updated with the UpdateSettingsRequest.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#quizsettings)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct QuizSettings {
     /// Whether this form is a quiz or not. When true, responses are graded based on question [`Grading`](https://developers.google.com/forms/api/reference/rest/v1/forms#Grading). Upon setting to false, all question [`Grading`](https://developers.google.com/forms/api/reference/rest/v1/forms#Grading) is deleted.
     pub is_quiz: bool,
@@ -90,7 +59,7 @@ pub struct QuizSettings {
 /// A single item of the form. `kind` defines which kind of item it is.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#item)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Item {
     /// The item ID.
     ///
@@ -107,7 +76,7 @@ pub struct Item {
 /// The kind of item this is.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#item)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ItemKind {
     /// Poses a question to the user.
     QuestionItem(QuestionItem),
@@ -126,7 +95,7 @@ pub enum ItemKind {
 /// A form item containing a single question.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#questionitem)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct QuestionItem {
     /// Required. The displayed question.
     pub question: Question,
@@ -137,12 +106,12 @@ pub struct QuestionItem {
 /// Any question. The specific type of question is known by its `kind`.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#question)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Question {
     /// Read only. The question ID.
     ///
     /// On creation, it can be provided but the ID must not be already used in the form. If not provided, a new ID is assigned.
-    question_id: String,
+    pub question_id: String,
     /// Whether the question must be answered in order for a respondent to submit their response.
     pub required: bool,
     /// Grading setup for the question.
@@ -151,19 +120,10 @@ pub struct Question {
     pub kind: QuestionKind,
 }
 
-impl Question {
-    /// Read only. The question ID.
-    ///
-    /// On creation, it can be provided but the ID must not be already used in the form. If not provided, a new ID is assigned.
-    pub fn question_id(&self) -> String {
-        self.question_id.clone()
-    }
-}
-
 /// The type of question offered to a respondent.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#question)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum QuestionKind {
     /// A respondent can choose from a pre-defined set of options.
     ChoiceQuestion(ChoiceQuestion),
@@ -184,7 +144,7 @@ pub enum QuestionKind {
 /// A radio/checkbox/dropdown question.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#choicequestion)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ChoiceQuestion {
     /// Required. The type of choice question.
     pub _type: ChoiceType,
@@ -197,7 +157,7 @@ pub struct ChoiceQuestion {
 /// The type of choice.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#choicetype)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ChoiceType {
     /// Default value. Unused.
     ChoiceTypeUnspecified,
@@ -212,7 +172,7 @@ pub enum ChoiceType {
 /// An option for a Choice question.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#option)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Option {
     /// Required. The choice as presented to the user.
     pub value: String,
@@ -227,7 +187,7 @@ pub struct Option {
 /// Which section to go to if this option is selected. Currently only applies to `RADIO` and `SELECT` choice type, but is not allowed in a [`QuestionGroupItem`](https://developers.google.com/forms/api/reference/rest/v1/forms#QuestionGroupItem)
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#option)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum GoToSection {
     /// Section navigation type.
     GoToAction(GoToAction),
@@ -238,7 +198,7 @@ pub enum GoToSection {
 /// Constants for section navigation.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#gotoaction)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum GoToAction {
     /// Default value. Unused.
     GoToActionUnspecified,
@@ -253,10 +213,10 @@ pub enum GoToAction {
 /// Data representing an image.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#image)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Image {
     /// Output only. A URI from which you can download the image; this is valid only for a limited time.
-    content_uri: String,
+    pub content_uri: String,
     /// A description of the image that is shown on hover and read by screenreaders.
     pub alt_text: String,
     /// Properties of an image.
@@ -265,17 +225,10 @@ pub struct Image {
     pub source_uri: String,
 }
 
-impl Image {
-    /// Output only. A URI from which you can download the image; this is valid only for a limited time.
-    pub fn content_uri(&self) -> String {
-        self.content_uri.clone()
-    }
-}
-
 /// Properties of the media.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#mediaproperties)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct MediaProperties {
     /// Position of the media.
     pub alignment: Alignment,
@@ -286,7 +239,7 @@ pub struct MediaProperties {
 /// Alignment on the page.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#alignment)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Alignment {
     /// Default value. Unused.
     AlignmentUnspecified,
@@ -301,7 +254,7 @@ pub enum Alignment {
 /// A text-based question.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#textquestion)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TextQuestion {
     /// Whether the question is a paragraph question or not. If not, the question is a short text question.
     pub paragraph: bool,
@@ -310,7 +263,7 @@ pub struct TextQuestion {
 /// A scale question. The user has a range of numeric values to choose from
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#scalequestion)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ScaleQuestion {
     /// Required. The lowest possible value for the scale.
     pub low: i32,
@@ -325,7 +278,7 @@ pub struct ScaleQuestion {
 /// A date question. Date questions default to just month + day.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#datequestion)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DateQuestion {
     /// Whether to include the time as part of the question.
     pub include_time: bool,
@@ -336,7 +289,7 @@ pub struct DateQuestion {
 /// A time question.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#timequestion)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TimeQuestion {
     /// `true` if the question is about an elapsed time. Otherwise it is about a time of day.
     pub duration: bool,
@@ -345,7 +298,7 @@ pub struct TimeQuestion {
 /// A file upload question. The API currently does not support creating file upload questions.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#fileuploadquestion)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FileUploadQuestion {
     /// Required. The ID of the Drive folder where uploaded files are stored.
     pub folder_id: String,
@@ -360,7 +313,7 @@ pub struct FileUploadQuestion {
 /// File types that can be uploaded to a file upload question.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#filetype)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum FileType {
     /// Default value. Unused.
     FileTypeUnspecified,
@@ -387,7 +340,7 @@ pub enum FileType {
 /// Configuration for a question that is part of a question group.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#rowquestion)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RowQuestion {
     /// Required. The title for the single row in the [`QuestionGroupItem`](https://developers.google.com/forms/api/reference/rest/v1/forms#QuestionGroupItem).
     pub title: String,
@@ -396,7 +349,7 @@ pub struct RowQuestion {
 /// Grading for a single question
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#grading)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Grading {
     /// Required. The maximum number of points a respondent can automatically get for a correct answer. This must not be negative.
     pub point_value: i32,
@@ -413,7 +366,7 @@ pub struct Grading {
 /// The answer key for a question.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#correctanswers)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CorrectAnswers {
     /// A list of correct answers. A quiz response can be automatically graded based on these answers. For single-valued questions, a response is marked correct if it matches any value in this list (in other words, multiple correct answers are possible). For multiple-valued (CHECKBOX) questions, a response is marked correct if it contains exactly the values in this list.
     pub answers: Vec<CorrectAnswer>,
@@ -422,7 +375,7 @@ pub struct CorrectAnswers {
 /// A single correct answer for a question. For multiple-valued (`CHECKBOX`) questions, several `CorrectAnswer`s may be needed to represent a single correct response option.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#correctanswer)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CorrectAnswer {
     /// Required. The correct answer value. See the documentation for [`TextAnswer.value`](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#TextAnswer.FIELDS.value) for details on how various value types are formatted.
     pub value: String,
@@ -431,7 +384,7 @@ pub struct CorrectAnswer {
 /// Defines a question that comprises multiple questions grouped together.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#questiongroupitem)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct QuestionGroupItem {
     /// Required. A list of questions that belong in this question group. A question must only belong to one group. The `kind` of the group may affect what types of questions are allowed.
     pub questions: Vec<Question>,
@@ -444,7 +397,7 @@ pub struct QuestionGroupItem {
 /// A grid of choices (radio or check boxes) with each row constituting a separate question. Each row has the same choices, which are shown as the columns.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#grid)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Grid {
     /// Required. The choices shared by each question in the grid. In other words, the values of the columns. Only `CHECK_BOX` and `RADIO` choices are allowed.
     pub columns: ChoiceQuestion,
@@ -455,19 +408,19 @@ pub struct Grid {
 /// A page break. The title and description of this item are shown at the top of the new page.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#pagebreakitem)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PageBreakItem;
 
 /// A text item.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#textitem)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TextItem;
 
 /// An item containing an image.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#imageitem)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ImageItem {
     /// Required. The image displayed in the item.
     pub image: Image,
@@ -476,7 +429,7 @@ pub struct ImageItem {
 /// An item containing a video.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#videoitem)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct VideoItem {
     /// Required. The video displayed in the item.
     pub video: Video,
@@ -487,7 +440,7 @@ pub struct VideoItem {
 /// Data representing a video.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#video)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Video {
     /// Required. A YouTube URI.
     pub youtube_uri: String,
@@ -511,7 +464,7 @@ pub fn batch_update(
 /// Request body for `batch_update`.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#request-body)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct BatchUpdateFormRequest {
     /// Whether to return an updated version of the model in the response.
     pub include_form_in_response: bool,
@@ -524,7 +477,7 @@ pub struct BatchUpdateFormRequest {
 /// Response body for `batch_update`.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#response-body)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct BatchUpdateFormResponse {
     /// Based on the bool request field `includeFormInResponse`, a form with all applied mutations/updates is returned or not. This may be later than the revision ID created by these changes.
     pub form: Form,
@@ -537,7 +490,7 @@ pub struct BatchUpdateFormResponse {
 /// The kinds of update requests that can be made.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#request)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Request {
     /// The kind of request.
     pub kind: UpdateKind,
@@ -546,7 +499,7 @@ pub struct Request {
 /// The kind of request.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#request)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum UpdateKind {
     /// Update Form's Info.
     UpdateFormInfo(UpdateFormInfoRequest),
@@ -565,7 +518,7 @@ pub enum UpdateKind {
 /// Update Form's Info.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#updateforminforequest)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct UpdateFormInfoRequest {
     /// The info to update.
     pub info: Info,
@@ -578,7 +531,7 @@ pub struct UpdateFormInfoRequest {
 /// Update Form's [`FormSettings`](https://developers.google.com/forms/api/reference/rest/v1/forms#FormSettings).
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#updatesettingsrequest)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct UpdateSettingsRequest {
     /// Required. The settings to update with.
     pub settings: FormSettings,
@@ -591,7 +544,7 @@ pub struct UpdateSettingsRequest {
 /// Create an item in a form.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#createitemrequest)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CreateItemRequest {
     /// Required. The item to create.
     pub item: Item,
@@ -602,7 +555,7 @@ pub struct CreateItemRequest {
 /// A specific location in a form.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#location)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Location {
     /// The index of an item in the form. This must be in the range
     ///
@@ -615,7 +568,7 @@ pub struct Location {
 /// Move an item in a form.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#moveitemrequest)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct MoveItemRequest {
     /// Required. The location of the item to move.
     pub original_location: Location,
@@ -626,7 +579,7 @@ pub struct MoveItemRequest {
 /// Delete an item in a form.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#deleteitemrequest)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DeleteItemRequest {
     /// Required. The location of the item to delete.
     pub location: Location,
@@ -635,7 +588,7 @@ pub struct DeleteItemRequest {
 /// Update an item in a form.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#updateitemrequest)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct UpdateItemRequest {
     /// Required. New values for the item. Note that item and question IDs are used if they are provided (and are in the field mask). If an ID is blank (and in the field mask) a new ID is generated. This means you can modify an item by getting the form via [`forms.get`](https://developers.google.com/forms/api/reference/rest/v1/forms/get#google.apps.forms.v1.FormsService.GetForm), modifying your local copy of that item to be how you want it, and using [`UpdateItemRequest`](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#UpdateItemRequest) to write it back, with the IDs being the same (or not in the field mask).
     pub item: Item,
@@ -650,7 +603,7 @@ pub struct UpdateItemRequest {
 /// Provides control over how write requests are executed.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#writecontrol)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct WriteControl {
     /// Determines the revision of the form from which changes are to be applied, and how the request should behave if that revision is not the current revision of the form.
     pub control: ControlKind,
@@ -659,7 +612,7 @@ pub struct WriteControl {
 /// Determines the revision of the form from which changes are to be applied, and how the request should behave if that revision is not the current revision of the form.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#writecontrol)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ControlKind {
     /// The revision ID of the form that the write request is applied to. If this is not the latest revision of the form, the request is not processed and returns a 400 bad request error.
     RequiredRevisionId(String),
@@ -674,7 +627,7 @@ pub enum ControlKind {
 /// A single response from an update.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#response)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Response {
     /// The result of creating an item.
     pub create_item: CreateItemResponse,
@@ -683,7 +636,7 @@ pub struct Response {
 /// The result of creating an item.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate#createitemresponse)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CreateItemResponse {
     /// The ID of the created item.
     pub item_id: String,
