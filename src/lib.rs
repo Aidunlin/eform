@@ -7,8 +7,8 @@ mod gform_models;
 enum AppView {
     #[default]
     Default,
-    Form(gform_models::forms::Form),
-    Response(gform_models::responses::FormResponse),
+    Form(usize),
+    Response(usize),
 }
 
 #[derive(Default, Serialize, Deserialize)]
@@ -40,11 +40,128 @@ impl App {
         .unwrap();
     }
 
-    fn ui_default(&mut self, ui: &mut egui::Ui) {}
+    fn new_response(&mut self, form: gform_models::forms::Form) {
+        let response_id = self
+            .responses
+            .iter()
+            .filter(|response| response.form_id == form.form_id)
+            .count()
+            .to_string();
 
-    fn ui_form(&mut self, ui: &mut egui::Ui, form: gform_models::forms::Form) {}
+        let response = gform_models::responses::FormResponse {
+            form_id: form.form_id.clone(),
+            response_id,
+            create_time: String::new(),
+            last_submitted_time: String::new(),
+            respondent_email: String::new(),
+            answers: Vec::new(),
+            total_score: None,
+        };
 
-    fn ui_response(&mut self, ui: &mut egui::Ui, response: gform_models::responses::FormResponse) {}
+        self.view = AppView::Response(self.responses.len());
+        self.responses.push(response);
+    }
+
+    fn ui_default(&mut self, ui: &mut egui::Ui) {
+        if ui.button("New form").clicked() {
+            let index = self.forms.len();
+
+            let form = gform_models::forms::Form {
+                form_id: index.to_string(),
+                info: gform_models::forms::Info {
+                    title: "Untitled form".into(),
+                    document_title: String::new(),
+                    description: String::new(),
+                },
+                settings: gform_models::forms::FormSettings {
+                    quiz_settings: gform_models::forms::QuizSettings { is_quiz: false },
+                },
+                items: Vec::new(),
+                revision_id: String::new(),
+                responder_uri: String::new(),
+                linked_sheet_id: String::new(),
+            };
+
+            self.view = AppView::Form(index);
+            self.forms.push(form.clone());
+        }
+
+        egui::Grid::new("forms_grid").striped(true).show(ui, |ui| {
+            let mut new_response = None;
+            let mut remove_form = None;
+
+            for (index, form) in self.forms.iter().enumerate() {
+                ui.label(form.info.title.clone());
+
+                ui.horizontal(|ui| {
+                    if ui.button("Edit form").clicked() {
+                        self.view = AppView::Form(index);
+                    }
+
+                    if ui.button("New response").clicked() {
+                        new_response = Some(index);
+                    }
+
+                    if ui.button("Remove form").clicked() {
+                        remove_form = Some(index);
+                    }
+                });
+
+                ui.end_row();
+            }
+
+            if let Some(index) = new_response {
+                self.new_response(self.forms[index].clone());
+            }
+
+            if let Some(index) = remove_form {
+                let form_id = self.forms[index].form_id.clone();
+                self.forms.remove(index);
+
+                self.responses = self
+                    .responses
+                    .clone()
+                    .into_iter()
+                    .filter(|response| response.form_id != form_id)
+                    .collect();
+            }
+        });
+    }
+
+    fn ui_form(&mut self, ui: &mut egui::Ui, form_index: usize) {
+        if ui.button("Go back").clicked() {
+            self.view = AppView::Default;
+        }
+
+        if ui.button("New response").clicked() {
+            self.new_response(self.forms[form_index].clone());
+        }
+
+        ui.group(|ui| {
+            ui.text_edit_singleline(&mut self.forms[form_index].info.title);
+            ui.text_edit_multiline(&mut self.forms[form_index].info.description);
+        });
+    }
+
+    fn ui_response(&mut self, ui: &mut egui::Ui, response_index: usize) {
+        let form_index = self.responses[response_index]
+            .form_id
+            .parse::<usize>()
+            .unwrap();
+        let form = self.forms[form_index].clone();
+
+        if ui.button("Go back").clicked() {
+            self.view = AppView::Default;
+        }
+
+        ui.group(|ui| {
+            ui.heading(form.info.title.clone());
+
+            if form.info.description.len() > 0 {
+                ui.label(form.info.description);
+            }
+        });
+    }
 }
 
 impl eframe::App for App {
@@ -52,10 +169,10 @@ impl eframe::App for App {
         egui::CentralPanel::default().show(context, |ui| {
             egui::ScrollArea::vertical()
                 .auto_shrink([false, false])
-                .show(ui, |ui| match &self.view {
+                .show(ui, |ui| match self.view {
                     AppView::Default => self.ui_default(ui),
-                    AppView::Form(form) => self.ui_form(ui, form.clone()),
-                    AppView::Response(response) => self.ui_response(ui, response.clone()),
+                    AppView::Form(form_index) => self.ui_form(ui, form_index),
+                    AppView::Response(response_index) => self.ui_response(ui, response_index),
                 });
         });
     }
