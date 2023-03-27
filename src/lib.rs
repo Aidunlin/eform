@@ -1,7 +1,7 @@
 use eframe::egui;
 use serde::{Deserialize, Serialize};
 
-mod gform_models;
+mod gform;
 
 #[derive(Default, Serialize, Deserialize)]
 enum AppView {
@@ -14,8 +14,8 @@ enum AppView {
 #[derive(Default, Serialize, Deserialize)]
 pub struct App {
     view: AppView,
-    forms: Vec<gform_models::forms::Form>,
-    responses: Vec<gform_models::responses::FormResponse>,
+    forms: Vec<gform::forms::Form>,
+    responses: Vec<gform::responses::FormResponse>,
 }
 
 impl App {
@@ -40,7 +40,7 @@ impl App {
         .unwrap();
     }
 
-    fn new_response(&mut self, form: gform_models::forms::Form) {
+    fn new_response(&mut self, form: gform::forms::Form) {
         let response_id = self
             .responses
             .iter()
@@ -48,7 +48,7 @@ impl App {
             .count()
             .to_string();
 
-        let response = gform_models::responses::FormResponse {
+        let response = gform::responses::FormResponse {
             form_id: form.form_id.clone(),
             response_id,
             create_time: String::new(),
@@ -66,15 +66,15 @@ impl App {
         if ui.button("New form").clicked() {
             let index = self.forms.len();
 
-            let form = gform_models::forms::Form {
+            let form = gform::forms::Form {
                 form_id: index.to_string(),
-                info: gform_models::forms::Info {
+                info: gform::forms::Info {
                     title: "Untitled form".into(),
                     document_title: String::new(),
                     description: String::new(),
                 },
-                settings: gform_models::forms::FormSettings {
-                    quiz_settings: gform_models::forms::QuizSettings { is_quiz: false },
+                settings: gform::forms::FormSettings {
+                    quiz_settings: gform::forms::QuizSettings { is_quiz: false },
                 },
                 items: Vec::new(),
                 revision_id: String::new(),
