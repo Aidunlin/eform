@@ -51,11 +51,7 @@ impl App {
         let response = gform::responses::FormResponse {
             form_id: form.form_id.clone(),
             response_id,
-            create_time: String::new(),
-            last_submitted_time: String::new(),
-            respondent_email: String::new(),
-            answers: Vec::new(),
-            total_score: None,
+            ..gform::responses::FormResponse::default()
         };
 
         self.view = AppView::Response(self.responses.len());
@@ -70,16 +66,9 @@ impl App {
                 form_id: index.to_string(),
                 info: gform::forms::Info {
                     title: "Untitled form".into(),
-                    document_title: String::new(),
-                    description: String::new(),
+                    ..gform::forms::Info::default()
                 },
-                settings: gform::forms::FormSettings {
-                    quiz_settings: gform::forms::QuizSettings { is_quiz: false },
-                },
-                items: Vec::new(),
-                revision_id: String::new(),
-                responder_uri: String::new(),
-                linked_sheet_id: String::new(),
+                ..gform::forms::Form::default()
             };
 
             self.view = AppView::Form(index);

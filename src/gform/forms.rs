@@ -5,7 +5,7 @@ use super::feedback::Feedback;
 /// A Google Forms document. A form is created in Drive, and deleting a form or changing its access protections is done via the [Drive API](https://developers.google.com/drive/api/v3/about-sdk).
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#resource:-form)
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub struct Form {
     /// Output only. The form ID.
     pub form_id: String,
@@ -28,7 +28,7 @@ pub struct Form {
 /// The general information for a form.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#info)
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub struct Info {
     /// Required. The title of the form which is visible to responders.
     pub title: String,
@@ -41,7 +41,7 @@ pub struct Info {
 /// A form's settings.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#formsettings)
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub struct FormSettings {
     /// Settings related to quiz forms and grading.
     pub quiz_settings: QuizSettings,
@@ -50,7 +50,7 @@ pub struct FormSettings {
 /// Settings related to quiz forms and grading. These must be updated with the UpdateSettingsRequest.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms#quizsettings)
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub struct QuizSettings {
     /// Whether this form is a quiz or not. When true, responses are graded based on question [`Grading`](https://developers.google.com/forms/api/reference/rest/v1/forms#Grading). Upon setting to false, all question [`Grading`](https://developers.google.com/forms/api/reference/rest/v1/forms#Grading) is deleted.
     pub is_quiz: bool,

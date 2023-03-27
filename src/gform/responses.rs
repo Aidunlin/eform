@@ -1,11 +1,12 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use super::feedback::Feedback;
 
 /// A form response.
 ///
 /// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#resource:-formresponse)
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub struct FormResponse {
     /// Output only. The form ID.
     pub form_id: String,
@@ -22,16 +23,9 @@ pub struct FormResponse {
     /// Output only. The email address (if collected) for the respondent.
     pub respondent_email: String,
     /// Output only. The actual answers to the questions, keyed by questionId.
-    pub answers: Vec<AnswerKeyValue>,
+    pub answers: HashMap<String, Answer>,
     /// Output only. The total number of points the respondent received for their submission. Only set if the form was a quiz and the response was graded. This includes points automatically awarded via autograding adjusted by any manual corrections entered by the form owner.
     pub total_score: Option<f64>,
-}
-
-/// [View API](https://developers.google.com/forms/api/reference/rest/v1/forms.responses#resource:-formresponse)
-#[derive(Clone, Serialize, Deserialize)]
-pub struct AnswerKeyValue {
-    pub key: String,
-    pub value: Answer,
 }
 
 /// The submitted answer for a question.
