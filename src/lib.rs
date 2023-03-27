@@ -49,7 +49,7 @@ impl App {
             .to_string();
 
         let response = gform::responses::FormResponse {
-            form_id: form.form_id.clone(),
+            form_id: form.form_id,
             response_id,
             ..gform::responses::FormResponse::default()
         };
@@ -58,112 +58,136 @@ impl App {
         self.responses.push(response);
     }
 
-    fn ui_default(&mut self, ui: &mut egui::Ui) {
-        if ui.button("New form").clicked() {
-            let index = self.forms.len();
+    fn top_panel(
+        id: impl Into<egui::Id>,
+        context: &egui::Context,
+        add_contents: impl FnOnce(&mut egui::Ui),
+    ) {
+        egui::TopBottomPanel::top(id).show(context, |ui| ui.horizontal(add_contents));
+    }
 
-            let form = gform::forms::Form {
-                form_id: index.to_string(),
-                info: gform::forms::Info {
-                    title: "Untitled form".into(),
-                    ..gform::forms::Info::default()
-                },
-                ..gform::forms::Form::default()
-            };
-
-            self.view = AppView::Form(index);
-            self.forms.push(form.clone());
-        }
-
-        egui::Grid::new("forms_grid").striped(true).show(ui, |ui| {
-            let mut new_response = None;
-            let mut remove_form = None;
-
-            for (index, form) in self.forms.iter().enumerate() {
-                ui.label(form.info.title.clone());
-
-                ui.horizontal(|ui| {
-                    if ui.button("Edit form").clicked() {
-                        self.view = AppView::Form(index);
-                    }
-
-                    if ui.button("New response").clicked() {
-                        new_response = Some(index);
-                    }
-
-                    if ui.button("Remove form").clicked() {
-                        remove_form = Some(index);
-                    }
-                });
-
-                ui.end_row();
-            }
-
-            if let Some(index) = new_response {
-                self.new_response(self.forms[index].clone());
-            }
-
-            if let Some(index) = remove_form {
-                let form_id = self.forms[index].form_id.clone();
-                self.forms.remove(index);
-
-                self.responses = self
-                    .responses
-                    .clone()
-                    .into_iter()
-                    .filter(|response| response.form_id != form_id)
-                    .collect();
-            }
+    fn central_panel(context: &egui::Context, add_contents: impl FnOnce(&mut egui::Ui)) {
+        egui::CentralPanel::default().show(context, |ui| {
+            egui::ScrollArea::vertical()
+                .auto_shrink([false, false])
+                .show(ui, add_contents);
         });
     }
 
-    fn ui_form(&mut self, ui: &mut egui::Ui, form_index: usize) {
-        if ui.button("Go back").clicked() {
-            self.view = AppView::Default;
-        }
+    fn ui_default(&mut self, context: &egui::Context) {
+        Self::top_panel("top_panel_default", context, |ui| {
+            if ui.button("New form").clicked() {
+                let index = self.forms.len();
 
-        if ui.button("New response").clicked() {
-            self.new_response(self.forms[form_index].clone());
-        }
+                let form = gform::forms::Form {
+                    form_id: index.to_string(),
+                    info: gform::forms::Info {
+                        title: "Untitled form".into(),
+                        ..gform::forms::Info::default()
+                    },
+                    ..gform::forms::Form::default()
+                };
 
-        ui.group(|ui| {
-            ui.text_edit_singleline(&mut self.forms[form_index].info.title);
-            ui.text_edit_multiline(&mut self.forms[form_index].info.description);
+                self.view = AppView::Form(index);
+                self.forms.push(form.clone());
+            }
+        });
+
+        Self::central_panel(context, |ui| {
+            egui::Grid::new("forms_grid").striped(true).show(ui, |ui| {
+                let mut new_response = None;
+                let mut remove_form = None;
+
+                for (index, form) in self.forms.iter().enumerate() {
+                    ui.label(form.info.title.clone());
+
+                    ui.horizontal(|ui| {
+                        if ui.button("Edit form").clicked() {
+                            self.view = AppView::Form(index);
+                        }
+
+                        if ui.button("New response").clicked() {
+                            new_response = Some(index);
+                        }
+
+                        if ui.button("Remove form").clicked() {
+                            remove_form = Some(index);
+                        }
+                    });
+
+                    ui.end_row();
+                }
+
+                if let Some(index) = new_response {
+                    self.new_response(self.forms[index].clone());
+                }
+
+                if let Some(index) = remove_form {
+                    let form_id = self.forms[index].form_id.clone();
+                    self.forms.remove(index);
+
+                    self.responses = self
+                        .responses
+                        .clone()
+                        .into_iter()
+                        .filter(|response| response.form_id != form_id)
+                        .collect();
+                }
+            });
         });
     }
 
-    fn ui_response(&mut self, ui: &mut egui::Ui, response_index: usize) {
+    fn ui_form(&mut self, context: &egui::Context, form_index: usize) {
+        Self::top_panel("top_panel_form", context, |ui| {
+            if ui.button("Go back").clicked() {
+                self.view = AppView::Default;
+            }
+
+            if ui.button("New response").clicked() {
+                self.new_response(self.forms[form_index].clone());
+            }
+        });
+
+        Self::central_panel(context, |ui| {
+            ui.group(|ui| {
+                ui.text_edit_singleline(&mut self.forms[form_index].info.title);
+                ui.text_edit_multiline(&mut self.forms[form_index].info.description);
+            });
+        });
+    }
+
+    fn ui_response(&mut self, context: &egui::Context, response_index: usize) {
         let form_index = self.responses[response_index]
             .form_id
             .parse::<usize>()
             .unwrap();
         let form = self.forms[form_index].clone();
 
-        if ui.button("Go back").clicked() {
-            self.view = AppView::Default;
-        }
-
-        ui.group(|ui| {
-            ui.heading(form.info.title.clone());
-
-            if form.info.description.len() > 0 {
-                ui.label(form.info.description);
+        Self::top_panel("top_panel_response", context, |ui| {
+            if ui.button("Go back").clicked() {
+                self.view = AppView::Default;
             }
+        });
+
+        Self::central_panel(context, |ui| {
+            ui.group(|ui| {
+                ui.heading(form.info.title.clone());
+
+                if form.info.description.len() > 0 {
+                    ui.label(form.info.description);
+                }
+            });
         });
     }
 }
 
 impl eframe::App for App {
     fn update(&mut self, context: &egui::Context, _: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(context, |ui| {
-            egui::ScrollArea::vertical()
-                .auto_shrink([false, false])
-                .show(ui, |ui| match self.view {
-                    AppView::Default => self.ui_default(ui),
-                    AppView::Form(form_index) => self.ui_form(ui, form_index),
-                    AppView::Response(response_index) => self.ui_response(ui, response_index),
-                });
-        });
+        match self.view {
+            AppView::Default => self.ui_default(context),
+            AppView::Form(form_index) => self.ui_form(context, form_index),
+            AppView::Response(response_index) => self.ui_response(context, response_index),
+        }
     }
 
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
