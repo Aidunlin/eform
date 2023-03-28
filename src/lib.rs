@@ -40,6 +40,22 @@ impl App {
         .unwrap();
     }
 
+    fn top_panel(
+        id: impl Into<egui::Id>,
+        context: &egui::Context,
+        add_contents: impl FnOnce(&mut egui::Ui),
+    ) {
+        egui::TopBottomPanel::top(id).show(context, |ui| ui.horizontal(add_contents));
+    }
+
+    fn central_panel(context: &egui::Context, add_contents: impl FnOnce(&mut egui::Ui)) {
+        egui::CentralPanel::default().show(context, |ui| {
+            egui::ScrollArea::vertical()
+                .auto_shrink([false, false])
+                .show(ui, add_contents);
+        });
+    }
+
     fn new_response(&mut self, form: gform::forms::Form) {
         let response_id = self
             .responses
@@ -56,22 +72,6 @@ impl App {
 
         self.view = AppView::Response(self.responses.len());
         self.responses.push(response);
-    }
-
-    fn top_panel(
-        id: impl Into<egui::Id>,
-        context: &egui::Context,
-        add_contents: impl FnOnce(&mut egui::Ui),
-    ) {
-        egui::TopBottomPanel::top(id).show(context, |ui| ui.horizontal(add_contents));
-    }
-
-    fn central_panel(context: &egui::Context, add_contents: impl FnOnce(&mut egui::Ui)) {
-        egui::CentralPanel::default().show(context, |ui| {
-            egui::ScrollArea::vertical()
-                .auto_shrink([false, false])
-                .show(ui, add_contents);
-        });
     }
 
     fn ui_default(&mut self, context: &egui::Context) {
@@ -95,43 +95,30 @@ impl App {
 
         Self::central_panel(context, |ui| {
             egui::Grid::new("forms_grid").striped(true).show(ui, |ui| {
-                let mut new_response = None;
-                let mut remove_form = None;
-
-                for (index, form) in self.forms.iter().enumerate() {
+                for (index, form) in self.forms.clone().iter().enumerate() {
                     ui.label(form.info.title.clone());
 
                     ui.horizontal(|ui| {
-                        if ui.button("Edit form").clicked() {
+                        if ui.button("Edit").clicked() {
                             self.view = AppView::Form(index);
                         }
 
-                        if ui.button("New response").clicked() {
-                            new_response = Some(index);
+                        if ui.button("Fill").clicked() {
+                            self.new_response(form.clone());
                         }
 
-                        if ui.button("Remove form").clicked() {
-                            remove_form = Some(index);
+                        if ui.button("Remove").clicked() {
+                            self.forms.remove(index);
+                            self.responses = self
+                                .responses
+                                .clone()
+                                .into_iter()
+                                .filter(|response| response.form_id != form.form_id)
+                                .collect();
                         }
                     });
 
                     ui.end_row();
-                }
-
-                if let Some(index) = new_response {
-                    self.new_response(self.forms[index].clone());
-                }
-
-                if let Some(index) = remove_form {
-                    let form_id = self.forms[index].form_id.clone();
-                    self.forms.remove(index);
-
-                    self.responses = self
-                        .responses
-                        .clone()
-                        .into_iter()
-                        .filter(|response| response.form_id != form_id)
-                        .collect();
                 }
             });
         });
@@ -139,11 +126,11 @@ impl App {
 
     fn ui_form(&mut self, context: &egui::Context, form_index: usize) {
         Self::top_panel("top_panel_form", context, |ui| {
-            if ui.button("Go back").clicked() {
+            if ui.button("Back").clicked() {
                 self.view = AppView::Default;
             }
 
-            if ui.button("New response").clicked() {
+            if ui.button("Fill").clicked() {
                 self.new_response(self.forms[form_index].clone());
             }
         });
@@ -164,7 +151,7 @@ impl App {
         let form = self.forms[form_index].clone();
 
         Self::top_panel("top_panel_response", context, |ui| {
-            if ui.button("Go back").clicked() {
+            if ui.button("Back").clicked() {
                 self.view = AppView::Default;
             }
         });
