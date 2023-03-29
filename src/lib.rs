@@ -11,9 +11,18 @@ enum AppView {
     Response(usize),
 }
 
+#[derive(Default, PartialEq, Serialize, Deserialize)]
+enum FormTab {
+    #[default]
+    Questions,
+    Responses,
+    Settings,
+}
+
 #[derive(Default, Serialize, Deserialize)]
 pub struct App {
     view: AppView,
+    form_tab: FormTab,
     forms: Vec<gform::forms::Form>,
     responses: Vec<gform::responses::FormResponse>,
 }
@@ -32,12 +41,9 @@ impl App {
     }
 
     pub fn run() {
-        eframe::run_native(
-            "eform",
-            eframe::NativeOptions::default(),
-            Box::new(|cc| Box::new(Self::new(cc))),
-        )
-        .unwrap();
+        let options = eframe::NativeOptions::default();
+        let app: eframe::AppCreator = Box::new(|context| Box::new(Self::new(context)));
+        eframe::run_native("eform", options, app).unwrap();
     }
 
     fn top_panel(
@@ -56,7 +62,18 @@ impl App {
         });
     }
 
-    fn new_response(&mut self, form: gform::forms::Form) {
+    fn remove_form(&mut self, index: usize) {
+        self.responses = self
+            .responses
+            .clone()
+            .into_iter()
+            .filter(|response| response.form_id != self.forms[index].form_id)
+            .collect();
+
+        self.forms.remove(index);
+    }
+
+    fn new_response(&mut self, form: gform::forms::Form) -> usize {
         let response_id = self
             .responses
             .iter()
@@ -70,8 +87,9 @@ impl App {
             ..gform::responses::FormResponse::default()
         };
 
-        self.view = AppView::Response(self.responses.len());
         self.responses.push(response);
+
+        self.responses.len() - 1
     }
 
     fn ui_default(&mut self, context: &egui::Context) {
@@ -89,14 +107,14 @@ impl App {
                 };
 
                 self.view = AppView::Form(index);
-                self.forms.push(form.clone());
+                self.forms.push(form);
             }
         });
 
         Self::central_panel(context, |ui| {
             egui::Grid::new("forms_grid").striped(true).show(ui, |ui| {
-                for (index, form) in self.forms.clone().iter().enumerate() {
-                    ui.label(form.info.title.clone());
+                for index in 0..self.forms.len() {
+                    ui.label(&self.forms[index].info.title);
 
                     ui.horizontal(|ui| {
                         if ui.button("Edit").clicked() {
@@ -104,17 +122,12 @@ impl App {
                         }
 
                         if ui.button("Fill").clicked() {
-                            self.new_response(form.clone());
+                            let response_index = self.new_response(self.forms[index].clone());
+                            self.view = AppView::Response(response_index);
                         }
 
                         if ui.button("Remove").clicked() {
-                            self.forms.remove(index);
-                            self.responses = self
-                                .responses
-                                .clone()
-                                .into_iter()
-                                .filter(|response| response.form_id != form.form_id)
-                                .collect();
+                            self.remove_form(index);
                         }
                     });
 
@@ -125,22 +138,76 @@ impl App {
     }
 
     fn ui_form(&mut self, context: &egui::Context, form_index: usize) {
+        let mut this_form_deleted = false;
+
         Self::top_panel("top_panel_form", context, |ui| {
             if ui.button("Back").clicked() {
                 self.view = AppView::Default;
             }
 
-            if ui.button("Fill").clicked() {
-                self.new_response(self.forms[form_index].clone());
+            ui.separator();
+
+            ui.selectable_value(&mut self.form_tab, FormTab::Questions, "Questions");
+            ui.selectable_value(&mut self.form_tab, FormTab::Responses, "Responses");
+            ui.selectable_value(&mut self.form_tab, FormTab::Settings, "Settings");
+
+            ui.separator();
+
+            if ui.button("Preview").clicked() {
+                let response_index = self.new_response(self.forms[form_index].clone());
+                self.view = AppView::Response(response_index);
+            }
+
+            if ui.button("Duplicate").clicked() {
+                let mut new_form = self.forms[form_index].clone();
+                new_form.form_id = self.forms.len().to_string();
+
+                if new_form.info.title.len() > 0 {
+                    new_form.info.title += " Copy";
+                }
+
+                if new_form.info.document_title.len() > 0 {
+                    new_form.info.document_title += " Copy";
+                }
+
+                self.forms.push(new_form);
+                self.view = AppView::Form(self.forms.len() - 1);
+            }
+
+            if ui.button("Remove").clicked() {
+                self.remove_form(form_index);
+                this_form_deleted = true;
             }
         });
 
-        Self::central_panel(context, |ui| {
-            ui.group(|ui| {
-                ui.text_edit_singleline(&mut self.forms[form_index].info.title);
-                ui.text_edit_multiline(&mut self.forms[form_index].info.description);
-            });
-        });
+        if this_form_deleted {
+            self.view = AppView::Default;
+            return;
+        }
+
+        match self.form_tab {
+            FormTab::Questions => {
+                egui::SidePanel::right("right_panel_form_questions")
+                    .resizable(false)
+                    .show(context, |ui| {
+                        if ui.button("Add question").clicked() {}
+                        if ui.button("Import questions").clicked() {}
+                        if ui.button("Add title and description").clicked() {}
+                        if ui.button("Add image").clicked() {}
+                        if ui.button("Add video").clicked() {}
+                        if ui.button("Add section").clicked() {}
+                    });
+
+                Self::central_panel(context, |ui| {
+                    ui.group(|ui| {
+                        ui.text_edit_singleline(&mut self.forms[form_index].info.title);
+                        ui.text_edit_multiline(&mut self.forms[form_index].info.description);
+                    });
+                });
+            }
+            FormTab::Responses => {}
+            FormTab::Settings => {}
+        }
     }
 
     fn ui_response(&mut self, context: &egui::Context, response_index: usize) {
