@@ -1,4 +1,5 @@
 use eframe::egui;
+use gform::forms::{ChoiceType, ItemKind, QuestionKind};
 use serde::{Deserialize, Serialize};
 
 mod gform;
@@ -23,6 +24,7 @@ enum FormTab {
 pub struct App {
     view: AppView,
     form_tab: FormTab,
+    focused_question: usize,
     forms: Vec<gform::forms::Form>,
     responses: Vec<gform::responses::FormResponse>,
 }
@@ -114,7 +116,7 @@ impl App {
         Self::central_panel(context, |ui| {
             egui::Grid::new("forms_grid").striped(true).show(ui, |ui| {
                 for index in 0..self.forms.len() {
-                    ui.label(&self.forms[index].info.title);
+                    ui.label(&self.forms[index].info.document_title);
 
                     ui.horizontal(|ui| {
                         if ui.button("Edit").clicked() {
@@ -144,6 +146,8 @@ impl App {
             if ui.button("Back").clicked() {
                 self.view = AppView::Default;
             }
+
+            egui::TextEdit::singleline(&mut self.forms[form_index].info.document_title).show(ui);
 
             ui.separator();
 
@@ -186,29 +190,183 @@ impl App {
         }
 
         match self.form_tab {
-            FormTab::Questions => {
-                egui::SidePanel::right("right_panel_form_questions")
-                    .resizable(false)
-                    .show(context, |ui| {
-                        if ui.button("Add question").clicked() {}
-                        if ui.button("Import questions").clicked() {}
-                        if ui.button("Add title and description").clicked() {}
-                        if ui.button("Add image").clicked() {}
-                        if ui.button("Add video").clicked() {}
-                        if ui.button("Add section").clicked() {}
-                    });
-
-                Self::central_panel(context, |ui| {
-                    ui.group(|ui| {
-                        ui.text_edit_singleline(&mut self.forms[form_index].info.title);
-                        ui.text_edit_multiline(&mut self.forms[form_index].info.description);
-                    });
-                });
-            }
-            FormTab::Responses => {}
-            FormTab::Settings => {}
+            FormTab::Questions => self.ui_form_questions(context, form_index),
+            FormTab::Responses => self.ui_form_responses(context, form_index),
+            FormTab::Settings => self.ui_form_settings(context, form_index),
         }
     }
+
+    fn ui_form_sidebar(&mut self, ui: &mut egui::Ui, form_index: usize) {
+        ui.group(|ui| {
+            ui.set_width(25.0);
+            ui.with_layout(
+                egui::Layout::top_down_justified(egui::Align::Center),
+                |ui| {
+                    if ui.button("⊞").on_hover_text("Add question").clicked() {}
+                    if ui.button("⮋").on_hover_text("Import questions").clicked() {}
+                    if ui
+                        .button("🇹")
+                        .on_hover_text("Add title and description")
+                        .clicked()
+                    {}
+                    if ui.button("🖼").on_hover_text("Add image").clicked() {}
+                    if ui.button("🎞").on_hover_text("Add video").clicked() {}
+                    if ui.button("➗").on_hover_text("Add section").clicked() {}
+                },
+            );
+        });
+    }
+
+    fn ui_form_questions(&mut self, context: &egui::Context, form_index: usize) {
+        Self::central_panel(context, |ui| {
+            egui::Grid::new("form_questions_grid")
+                .min_col_width(300.0)
+                .show(ui, |ui| {
+                    if ui
+                        .group(|ui| {
+                            ui.vertical(|ui| {
+                                egui::TextEdit::singleline(&mut self.forms[form_index].info.title)
+                                    .hint_text("Form title")
+                                    .show(ui);
+                                egui::TextEdit::multiline(
+                                    &mut self.forms[form_index].info.description,
+                                )
+                                .hint_text("Form description")
+                                .desired_rows(1)
+                                .show(ui);
+                            });
+                        })
+                        .response
+                        .clicked()
+                    {
+                        self.focused_question = 0;
+                    };
+
+                    if self.focused_question == 0 {
+                        self.ui_form_sidebar(ui, form_index);
+                    }
+
+                    ui.end_row();
+
+                    for index in 0..self.forms[form_index].items.len() {
+                        let gform::forms::Item {
+                            item_id,
+                            title,
+                            description,
+                            kind,
+                        } = &mut self.forms[form_index].items[index];
+
+                        match kind {
+                            ItemKind::QuestionItem(question_item) => {
+                                let gform::forms::QuestionItem { question, image } = question_item;
+                                let gform::forms::Question {
+                                    question_id,
+                                    required,
+                                    grading,
+                                    kind,
+                                } = question;
+
+                                match kind {
+                                    QuestionKind::ChoiceQuestion(choice_question) => {
+                                        let gform::forms::ChoiceQuestion {
+                                            _type,
+                                            options,
+                                            shuffle,
+                                        } = choice_question;
+
+                                        match _type {
+                                            ChoiceType::Radio => {}
+                                            ChoiceType::Checkbox => {}
+                                            ChoiceType::DropDown => {}
+                                            _ => {}
+                                        }
+                                    }
+                                    QuestionKind::TextQuestion(text_question) => {
+                                        let gform::forms::TextQuestion { paragraph } =
+                                            text_question;
+                                    }
+                                    QuestionKind::ScaleQuestion(scale_question) => {
+                                        let gform::forms::ScaleQuestion {
+                                            low,
+                                            high,
+                                            low_label,
+                                            high_label,
+                                        } = scale_question;
+                                    }
+                                    QuestionKind::DateQuestion(date_question) => {
+                                        let gform::forms::DateQuestion {
+                                            include_time,
+                                            include_year,
+                                        } = date_question;
+                                    }
+                                    QuestionKind::TimeQuestion(time_question) => {
+                                        let gform::forms::TimeQuestion { duration } = time_question;
+                                    }
+                                    QuestionKind::FileUploadQuestion(file_upload_question) => {
+                                        let gform::forms::FileUploadQuestion {
+                                            folder_id,
+                                            types,
+                                            max_files,
+                                            max_file_size,
+                                        } = file_upload_question;
+                                    }
+                                    QuestionKind::RowQuestion(row_question) => {
+                                        let gform::forms::RowQuestion { title } = row_question;
+                                    }
+                                }
+                            }
+                            ItemKind::QuestionGroupItem(question_group_item) => {
+                                let gform::forms::QuestionGroupItem {
+                                    questions,
+                                    image,
+                                    grid,
+                                } = question_group_item;
+                                let gform::forms::Grid {
+                                    columns,
+                                    shuffle_questions,
+                                } = grid;
+                            }
+                            ItemKind::PageBreakItem(page_break_item) => {}
+                            ItemKind::TextItem(text_item) => {}
+                            ItemKind::ImageItem(image_item) => {
+                                let gform::forms::ImageItem { image } = image_item;
+                            }
+                            ItemKind::VideoItem(video_item) => {
+                                let gform::forms::VideoItem { video, caption } = video_item;
+                            }
+                        }
+
+                        if ui
+                            .group(|ui| {
+                                ui.vertical(|ui| {
+                                    egui::TextEdit::singleline(title)
+                                        .hint_text("Question")
+                                        .show(ui);
+                                    egui::TextEdit::multiline(description)
+                                        .hint_text("Description")
+                                        .desired_rows(1)
+                                        .show(ui);
+                                });
+                            })
+                            .response
+                            .clicked()
+                        {
+                            self.focused_question = index + 1;
+                        }
+
+                        if self.focused_question == index + 1 {
+                            self.ui_form_sidebar(ui, form_index);
+                        }
+
+                        ui.end_row();
+                    }
+                });
+        });
+    }
+
+    fn ui_form_responses(&mut self, context: &egui::Context, form_index: usize) {}
+
+    fn ui_form_settings(&mut self, context: &egui::Context, form_index: usize) {}
 
     fn ui_response(&mut self, context: &egui::Context, response_index: usize) {
         let form_index = self.responses[response_index]
