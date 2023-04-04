@@ -4,27 +4,68 @@ use serde::{Deserialize, Serialize};
 
 mod gform;
 
-#[derive(Default, Serialize, Deserialize)]
-enum AppView {
-    #[default]
-    Default,
-    Form(usize),
-    Response(usize),
+#[derive(PartialEq, Serialize, Deserialize)]
+enum FormTab {
+    Questions { focused_question: usize },
+    Responses,
+    Settings,
+}
+
+impl Default for FormTab {
+    fn default() -> Self {
+        Self::Questions {
+            focused_question: 0,
+        }
+    }
 }
 
 #[derive(Default, PartialEq, Serialize, Deserialize)]
-enum FormTab {
+enum AppView {
     #[default]
-    Questions,
-    Responses,
-    Settings,
+    Default,
+    Form {
+        index: usize,
+        form_tab: FormTab,
+    },
+    Response(usize),
+}
+
+impl AppView {
+    fn form(index: usize) -> Self {
+        Self::Form {
+            index,
+            form_tab: FormTab::default(),
+        }
+    }
+
+    fn get_focused_question(&self) -> usize {
+        let Self::Form { index, form_tab } = self else {
+            return 0;
+        };
+
+        let FormTab::Questions { focused_question } = form_tab else {
+            return 0;
+        };
+
+        *focused_question
+    }
+
+    fn set_focused_question(&mut self, focus: usize) {
+        let Self::Form { index, form_tab } = self else {
+            return;
+        };
+
+        let FormTab::Questions { mut focused_question } = form_tab else {
+            return;
+        };
+
+        focused_question = focus;
+    }
 }
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct App {
     view: AppView,
-    form_tab: FormTab,
-    focused_question: usize,
     forms: Vec<gform::forms::Form>,
     responses: Vec<gform::responses::FormResponse>,
 }
@@ -108,7 +149,7 @@ impl App {
                     ..gform::forms::Form::default()
                 };
 
-                self.view = AppView::Form(index);
+                self.view = AppView::form(index);
                 self.forms.push(form);
             }
         });
@@ -120,7 +161,7 @@ impl App {
 
                     ui.horizontal(|ui| {
                         if ui.button("Edit").clicked() {
-                            self.view = AppView::Form(index);
+                            self.view = AppView::form(index);
                         }
 
                         if ui.button("Fill").clicked() {
@@ -151,9 +192,34 @@ impl App {
 
             ui.separator();
 
-            ui.selectable_value(&mut self.form_tab, FormTab::Questions, "Questions");
-            ui.selectable_value(&mut self.form_tab, FormTab::Responses, "Responses");
-            ui.selectable_value(&mut self.form_tab, FormTab::Settings, "Settings");
+            let focus = self.view.get_focused_question();
+
+            ui.selectable_value(
+                &mut self.view,
+                AppView::Form {
+                    index: form_index,
+                    form_tab: FormTab::Questions {
+                        focused_question: focus,
+                    },
+                },
+                "Questions",
+            );
+            ui.selectable_value(
+                &mut self.view,
+                AppView::Form {
+                    index: form_index,
+                    form_tab: FormTab::Responses,
+                },
+                "Responses",
+            );
+            ui.selectable_value(
+                &mut self.view,
+                AppView::Form {
+                    index: form_index,
+                    form_tab: FormTab::Settings,
+                },
+                "Settings",
+            );
 
             ui.separator();
 
@@ -175,7 +241,7 @@ impl App {
                 }
 
                 self.forms.push(new_form);
-                self.view = AppView::Form(self.forms.len() - 1);
+                self.view = AppView::form(self.forms.len() - 1);
             }
 
             if ui.button("Remove").clicked() {
@@ -189,10 +255,14 @@ impl App {
             return;
         }
 
-        match self.form_tab {
-            FormTab::Questions => self.ui_form_questions(context, form_index),
-            FormTab::Responses => self.ui_form_responses(context, form_index),
-            FormTab::Settings => self.ui_form_settings(context, form_index),
+        if let AppView::Form { index: _, form_tab } = &self.view {
+            match form_tab {
+                FormTab::Questions { focused_question } => {
+                    self.ui_form_questions(context, form_index)
+                }
+                FormTab::Responses => self.ui_form_responses(context, form_index),
+                FormTab::Settings => self.ui_form_settings(context, form_index),
+            }
         }
     }
 
@@ -239,10 +309,10 @@ impl App {
                         .response
                         .clicked()
                     {
-                        self.focused_question = 0;
-                    };
+                        self.view.set_focused_question(0);
+                    }
 
-                    if self.focused_question == 0 {
+                    if self.view.get_focused_question() == 0 {
                         self.ui_form_sidebar(ui, form_index);
                     }
 
@@ -351,10 +421,10 @@ impl App {
                             .response
                             .clicked()
                         {
-                            self.focused_question = index + 1;
+                            self.view.set_focused_question(index + 1);
                         }
 
-                        if self.focused_question == index + 1 {
+                        if self.view.get_focused_question() == index + 1 {
                             self.ui_form_sidebar(ui, form_index);
                         }
 
@@ -397,7 +467,10 @@ impl eframe::App for App {
     fn update(&mut self, context: &egui::Context, _: &mut eframe::Frame) {
         match self.view {
             AppView::Default => self.ui_default(context),
-            AppView::Form(form_index) => self.ui_form(context, form_index),
+            AppView::Form {
+                index: form_index,
+                form_tab: _,
+            } => self.ui_form(context, form_index),
             AppView::Response(response_index) => self.ui_response(context, response_index),
         }
     }
