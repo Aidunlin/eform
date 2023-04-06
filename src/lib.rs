@@ -76,7 +76,7 @@ impl App {
             return Self::default();
         };
 
-        let Some(app) = eframe::get_value(storage, "data") else {
+        let Some(app) = eframe::get_value(storage, eframe::APP_KEY) else {
             return Self::default();
         };
 
@@ -476,6 +476,6 @@ impl eframe::App for App {
     }
 
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        eframe::set_value(storage, "data", self);
+        eframe::set_value(storage, eframe::APP_KEY, self);
     }
 }
