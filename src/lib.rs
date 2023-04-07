@@ -1,5 +1,4 @@
 use eframe::egui;
-use gform::forms::{ChoiceType, ItemKind, QuestionKind};
 use serde::{Deserialize, Serialize};
 
 mod gform;
@@ -325,86 +324,6 @@ impl App {
                             description,
                             kind,
                         } = &mut self.forms[form_index].items[index];
-
-                        match kind {
-                            ItemKind::QuestionItem(question_item) => {
-                                let gform::forms::QuestionItem { question, image } = question_item;
-                                let gform::forms::Question {
-                                    question_id,
-                                    required,
-                                    grading,
-                                    kind,
-                                } = question;
-
-                                match kind {
-                                    QuestionKind::ChoiceQuestion(choice_question) => {
-                                        let gform::forms::ChoiceQuestion {
-                                            _type,
-                                            options,
-                                            shuffle,
-                                        } = choice_question;
-
-                                        match _type {
-                                            ChoiceType::Radio => {}
-                                            ChoiceType::Checkbox => {}
-                                            ChoiceType::DropDown => {}
-                                            _ => {}
-                                        }
-                                    }
-                                    QuestionKind::TextQuestion(text_question) => {
-                                        let gform::forms::TextQuestion { paragraph } =
-                                            text_question;
-                                    }
-                                    QuestionKind::ScaleQuestion(scale_question) => {
-                                        let gform::forms::ScaleQuestion {
-                                            low,
-                                            high,
-                                            low_label,
-                                            high_label,
-                                        } = scale_question;
-                                    }
-                                    QuestionKind::DateQuestion(date_question) => {
-                                        let gform::forms::DateQuestion {
-                                            include_time,
-                                            include_year,
-                                        } = date_question;
-                                    }
-                                    QuestionKind::TimeQuestion(time_question) => {
-                                        let gform::forms::TimeQuestion { duration } = time_question;
-                                    }
-                                    QuestionKind::FileUploadQuestion(file_upload_question) => {
-                                        let gform::forms::FileUploadQuestion {
-                                            folder_id,
-                                            types,
-                                            max_files,
-                                            max_file_size,
-                                        } = file_upload_question;
-                                    }
-                                    QuestionKind::RowQuestion(row_question) => {
-                                        let gform::forms::RowQuestion { title } = row_question;
-                                    }
-                                }
-                            }
-                            ItemKind::QuestionGroupItem(question_group_item) => {
-                                let gform::forms::QuestionGroupItem {
-                                    questions,
-                                    image,
-                                    grid,
-                                } = question_group_item;
-                                let gform::forms::Grid {
-                                    columns,
-                                    shuffle_questions,
-                                } = grid;
-                            }
-                            ItemKind::PageBreakItem(page_break_item) => {}
-                            ItemKind::TextItem(text_item) => {}
-                            ItemKind::ImageItem(image_item) => {
-                                let gform::forms::ImageItem { image } = image_item;
-                            }
-                            ItemKind::VideoItem(video_item) => {
-                                let gform::forms::VideoItem { video, caption } = video_item;
-                            }
-                        }
 
                         if ui
                             .group(|ui| {
